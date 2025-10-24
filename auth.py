@@ -87,16 +87,9 @@ def login():
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
-        db = get_db()
-        error = None
-        user = db.execute(
-            "SELECT * FROM user WHERE username = ?", (username,)
-        ).fetchone()
-
-        if user is None:
-            error = "Incorrect username."
-        elif not check_password_hash(user["password"], password):
-            error = "Incorrect password."
+        
+        error, user = check_user(username, password)[0]
+        
 
         if error is None:
             # store the user id in a new session and return to the index
@@ -114,3 +107,18 @@ def logout():
     """Clear the current session, including the stored user id."""
     session.clear()
     return redirect(url_for("chat.index"))
+
+
+def check_user(user, password):
+    db = get_db()
+    error = None
+    user = db.execute(
+        "SELECT * FROM user WHERE username = ?", (user,)
+    ).fetchone()
+
+    if user is None:
+        error = "Incorrect username."
+    elif not check_password_hash(user["password"], password):
+        error = "Incorrect password." # TODO security risk
+
+    return (error, user)

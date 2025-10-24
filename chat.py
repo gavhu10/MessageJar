@@ -8,31 +8,29 @@ from flask import url_for
 from flask import jsonify
 from werkzeug.exceptions import abort
 
-from auth import login_required
+from auth import login_required, check_user
 from db import get_db
 
 chat = Blueprint("chat", __name__, url_prefix='/chat')
 
-def add_message(conn, author_id, content):
-    cur = conn.cursor()
-    cur.execute("INSERT INTO messages (author_id, content) VALUES (?, ?)", (author_id, content))
-    conn.commit()
-    return cur.lastrowid
-
-
-@chat.route("/api-get")
-def api_get():
-
-    print("g.user = "+str(g.user))
-
-    print('am here')
-    last = 0
-    #last = request.form['last']
+def add_message(author_id, content):
     db = get_db()
+
+    db.execute("INSERT INTO messages (author_id, content) VALUES (?, ?)", (author_id, content))
+    db.commit()
+
+    return db.lastrowid
+
+
+
+def get_messages(last_seen=0):
+    db = get_db()
+
     latest = db.execute('SELECT MAX(id) AS latest_id FROM messages;').fetchone()['latest_id']
+    if not latest: latest = 0
 
     print(latest)
-    if not latest: latest = 0
+    
     if not last:
         if int(latest) > 30:
             last = latest - 30
@@ -43,42 +41,57 @@ def api_get():
         JOIN user u ON m.author_id = u.id
         ORDER BY m.created ASC
     """).fetchall()
+
     return jsonify(results)
 
 
-
-    
-    # posts = db.execute(
-    #     "SELECT p.id, title, body, created, author_id, username"
-    #     " FROM post p JOIN user u ON p.author_id = u.id"
-    #     " ORDER BY created DESC"
-    # ).fetchall()
-    # print(posts)
-    #return render_template("blog/index.html", posts=posts)
-    print("g.user = "+g.user)
-
-
-@chat.route("/api-send", methods=("GET", "POST"))
+@chat.route('/')
 @login_required
+def index():
+    return get_messages()
+    
+
+
+@chat.route("/api-get", methods=("GET", "POST"))
+def api_get():
+
+    username = request.form["username"]
+    password = request.form["password"]
+    message = request.form["message"]
+    error = None
+
+    if not message:
+        error = "Title is required."
+
+    error, user = check_user(username, password)
+
+    if error is not None:
+        return "Error"+str(error)
+    else:
+
+        return get_messages()
+
+
+@chat.route("/api-send", methods=("POST"))
 def send():
   
-    if request.method == "POST":
-        message = request.form["message"]
-        error = None
+    username = request.form["username"]
+    password = request.form["password"]
+    message = request.form["message"]
+    error = None
 
-        if not message:
-            error = "Title is required."
+    if not message:
+        error = "Title is required."
 
-        if error is not None:
-            flash(error)
-        else:
-            db = get_db()
-            db.execute(
-                "INSERT INTO messages (content, author_id) VALUES (?, ?)",
-                (message, g.user["id"]),
-            )
-            db.commit()
-            return redirect(url_for("index"))
+    error, user = check_user(username, password)
 
-    return redirect(url_for("index"))
+    if error is not None:
+        return "Error"+str(error)
+    else:
+        
+        add_message(user["id"], message)
+        
+        
+        return redirect(url_for("chat.index"))
+
 
