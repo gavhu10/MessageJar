@@ -23,7 +23,7 @@ def add_message(conn, author_id, content):
 @chat.route("/api-get")
 def api_get():
 
-    print("g.user = "+g.user)
+    print("g.user = "+str(g.user))
 
     print('am here')
     last = 0
