@@ -21,6 +21,7 @@ def login_required(view):
 
     @functools.wraps(view)
     def wrapped_view(**kwargs):
+        print(g.user)
         if g.user is None:
             return redirect(url_for("auth.login"))
 
@@ -33,13 +34,13 @@ def login_required(view):
 def load_logged_in_user():
     """If a user id is stored in the session, load the user object from
     the database into ``g.user``."""
-    user_id = session.get("user_id")
+    username = session.get("username")
 
-    if user_id is None:
+    if not username:
         g.user = None
     else:
         g.user = (
-            get_db().execute("SELECT * FROM user WHERE id = ?", (user_id,)).fetchone()
+            get_db().execute("SELECT * FROM user WHERE username = ?", (username,)).fetchone()
         )
 
 
@@ -94,7 +95,7 @@ def login():
         if error is None:
             # store the user id in a new session and return to the index
             session.clear()
-            session["user_id"] = user["id"]
+            session["username"] = user["username"]
             return redirect(url_for("chat.index"))
 
         flash(error)
@@ -118,7 +119,7 @@ def check_user(user, password):
 
     if user is None:
         error = "Incorrect username."
-        user = 'lalala'
+        user = ''
     elif not check_password_hash(user["password"], password):
         error = "Incorrect password." # TODO security risk
 
