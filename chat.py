@@ -9,15 +9,17 @@ from flask import jsonify
 from werkzeug.exceptions import abort
 
 from auth import login_required, check_user
-from db import get_db
+from db import get_db, close_db
 
 chat = Blueprint("chat", __name__, url_prefix='/chat')
 
-def add_message(author_id, content):
+def add_message(author, content):
     db = get_db()
 
-    db.execute("INSERT INTO messages (author_id, content) VALUES (?, ?)", (author_id, content))
+    db.execute("INSERT INTO messages (author, content) VALUES (?, ?)", (author, content))
     db.commit()
+
+    close_db()
 
 
 
@@ -35,9 +37,9 @@ def get_messages(last_seen=0):
             last_seen = latest - 30
     
     results = db.execute("""
-        SELECT m.id, m.author_id, m.created, m.content
+        SELECT m.id, m.author, m.created, m.content
         FROM messages m
-        JOIN user u ON m.author_id = u.id
+        JOIN user u ON m.author = u.id
         ORDER BY m.created ASC
     """)
 
@@ -46,6 +48,8 @@ def get_messages(last_seen=0):
     json_data = []
 
     rv = results.fetchall()
+
+    close_db()
 
     for result in rv:
         json_data.append(dict(zip(row_headers,result)))
