@@ -88,14 +88,14 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
         
-        error, user = check_user(username, password)[0]
+        error, user = check_user(username, password)
         
 
         if error is None:
             # store the user id in a new session and return to the index
             session.clear()
             session["user_id"] = user["id"]
-            return redirect(url_for("index"))
+            return redirect(url_for("chat.index"))
 
         flash(error)
 
@@ -118,6 +118,7 @@ def check_user(user, password):
 
     if user is None:
         error = "Incorrect username."
+        user = 'lalala'
     elif not check_password_hash(user["password"], password):
         error = "Incorrect password." # TODO security risk
 

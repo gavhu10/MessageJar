@@ -31,9 +31,9 @@ def get_messages(last_seen=0):
 
     print(latest)
     
-    if not last:
+    if not last_seen:
         if int(latest) > 30:
-            last = latest - 30
+            last_seen = latest - 30
     
     results = db.execute("""
         SELECT m.id, m.author_id, m.created, m.content
@@ -72,7 +72,7 @@ def api_get():
         return get_messages()
 
 
-@chat.route("/api-send", methods=("POST"))
+@chat.route("/api-send", methods=["POST"])
 def send():
   
     username = request.form["username"]
