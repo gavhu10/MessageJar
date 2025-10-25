@@ -19,7 +19,6 @@ def add_message(author_id, content):
     db.execute("INSERT INTO messages (author_id, content) VALUES (?, ?)", (author_id, content))
     db.commit()
 
-    return db.lastrowid
 
 
 
@@ -40,16 +39,34 @@ def get_messages(last_seen=0):
         FROM messages m
         JOIN user u ON m.author_id = u.id
         ORDER BY m.created ASC
-    """).fetchall()
+    """)
 
-    return jsonify(results)
+    row_headers = [x[0] for x in results.description]
+
+    json_data = []
+
+    rv = results.fetchall()
+
+    for result in rv:
+        json_data.append(dict(zip(row_headers,result)))
+    return jsonify(json_data)
+
 
 
 @chat.route('/')
 @login_required
 def index():
-    return get_messages()
+    add_message('1', 'test')
+    return render_template("chat.html")
     
+
+@chat.route("/endpoint", methods=("GET", "POST"))
+@login_required
+def endpoint():
+    if request.method == 'GET':
+        return get_messages()
+    elif request.method == 'POST':
+        pass
 
 
 @chat.route("/api-get", methods=("GET", "POST"))

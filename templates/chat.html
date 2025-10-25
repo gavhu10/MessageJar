@@ -28,7 +28,7 @@
 
             // sychronize messages per 30 seconds
             function getMessage(chat_id) {
-      			  fetch(`${window.location.pathname}`, {
+      			  fetch("/chat/endpoint", {
       					method: "GET",
       		      credentials: "include",
       		      // cache: "no-cache",
@@ -72,7 +72,7 @@
 
             // send messages to backend
             function sendMessage() {
-              var url = "/api-send";
+              var url = "/chat/endpoint";
               var chat_id = url.substring(url.lastIndexOf('/') + 1);
       				var message = document.getElementById("message");
 
