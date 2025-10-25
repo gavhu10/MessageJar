@@ -39,7 +39,7 @@ def get_messages(last_seen=0):
     results = db.execute("""
         SELECT m.id, m.author, m.created, m.content
         FROM messages m
-        JOIN user u ON m.author = u.id
+        JOIN user u ON m.author = u.username
         ORDER BY m.created ASC
     """)
 
@@ -60,7 +60,7 @@ def get_messages(last_seen=0):
 @chat.route('/')
 @login_required
 def index():
-    add_message('1', 'test')
+    add_message(g.user["username"], 'test')
     return render_template("chat.html")
     
 
@@ -70,19 +70,18 @@ def endpoint():
     if request.method == 'GET':
         return get_messages()
     elif request.method == 'POST':
-        pass
+        content = request.form["message"]
+        add_message(str(g.user["username"]), content)
 
 
-@chat.route("/api-get", methods=("GET", "POST"))
+@chat.route("/api-get")
 def api_get():
 
     username = request.form["username"]
     password = request.form["password"]
-    message = request.form["message"]
     error = None
 
-    if not message:
-        error = "Title is required."
+
 
     error, user = check_user(username, password)
 
@@ -110,9 +109,7 @@ def send():
         return "Error"+str(error)
     else:
         
-        add_message(user["id"], message)
-        
-        
+        add_message(user["username"], message)
         return redirect(url_for("chat.index"))
 
 
