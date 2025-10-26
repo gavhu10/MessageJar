@@ -1,4 +1,9 @@
-<!DOCTYPE html>
-<html>
-    nice little page here
-</html>
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Hi!{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+nice little page here
+{% endblock %}
