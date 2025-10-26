@@ -5,7 +5,8 @@
         const container = document.getElementById('container');
         container.innerHTML = '';
         messages.forEach(function (m) {
-            const text = (typeof m === 'object' && m !== null) ? (m.text || JSON.stringify(m)) : String(m);
+          //  const text = (typeof m === 'object' && m !== null) ? (m.text || JSON.stringify(m)) : String(m);
+            const text = m.content || String(m);
             const p = document.createElement('p');
             p.textContent = text;
             container.appendChild(p);
