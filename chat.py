@@ -60,7 +60,6 @@ def get_messages(last_seen=0):
 @chat.route('/')
 @login_required
 def index():
-    add_message(g.user["username"], 'test')
     return render_template("chat.html")
     
 
@@ -72,6 +71,7 @@ def endpoint():
     elif request.method == 'POST':
         content = request.form["message"]
         add_message(str(g.user["username"]), content)
+        return "ok"
 
 
 @chat.route("/api-get")
