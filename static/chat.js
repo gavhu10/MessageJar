@@ -65,11 +65,18 @@
         });
     }
 
+    function scrollToBottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    document.getElementById('toTheBottom').addEventListener('click', scrollToBottom);
+
     // initial load and periodic sync
     getMessages();
     setInterval(getMessages, 1000);
 
     document.getElementById('sendMessageButton').addEventListener('click', sendMessage);
+
     document.getElementById('message').addEventListener('keydown', function (e) {
         if (e.key === 'Enter') {
             e.preventDefault();
