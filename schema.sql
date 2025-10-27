@@ -3,6 +3,7 @@
 
 DROP TABLE IF EXISTS user;
 DROP TABLE IF EXISTS post;
+DROP TABLE IF EXISTS rooms;
 
 CREATE TABLE user (
 --  id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -15,5 +16,14 @@ CREATE TABLE messages (
   author TEXT NOT NULL,
   created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   content TEXT NOT NULL,
-  FOREIGN KEY (author) REFERENCES user (username)
+  room TEXT NOT NULL,
+  FOREIGN KEY (author) REFERENCES user (username),
+  FOREIGN KEY (room) REFERENCES rooms (roomname)
+);
+
+CREATE TABLE rooms (
+  roomname TEXT NOT NULL,
+  member TEXT NOT NULL,
+  isadmin INTEGER NOT NULL DEFAULT 0,
+  FOREIGN KEY (member) REFERENCES user (username)
 );
