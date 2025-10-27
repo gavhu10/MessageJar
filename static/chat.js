@@ -13,7 +13,7 @@
     }
 
     function getMessages() {
-        return fetch('/chat/endpoint', {
+        return fetch('/chat/endpoint/' + window.room_name, {
             method: 'GET',
             credentials: 'include',
             headers: { 'Accept': 'application/json' }
@@ -43,7 +43,7 @@
 
         input.value = '';
 
-        fetch('/chat/endpoint', {
+        fetch('/chat/endpoint/'+ window.room_name, {
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

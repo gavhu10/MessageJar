@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Hi!{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<br>
+Hi! This a chat room by gavhu10. The main chat is <a href="{{ url_for('chat.room', room_name=main) }}">here.
+{% endblock %}
