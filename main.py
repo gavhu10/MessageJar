@@ -2,7 +2,7 @@ import os
 
 from auth import login_required
 
-from flask import Flask, render_template
+from flask import Flask, render_template # pyright: ignore[reportMissingImports]
 
 
 def create_app(test_config=None):
