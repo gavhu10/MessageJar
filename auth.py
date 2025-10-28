@@ -1,23 +1,13 @@
 import functools
+import flask as f
+from werkzeug.security import check_password_hash, generate_password_hash
+
+import chatbackend as cb
+from db import get_db
 
 status_user = 'Message Jar'
 
-from flask import Blueprint # TODO fix imports
-from flask import flash
-from flask import g
-from flask import redirect
-from flask import render_template
-from flask import request
-from flask import session
-from flask import url_for
-from werkzeug.security import check_password_hash
-from werkzeug.security import generate_password_hash
-
-import chatbackend as cb
-
-from db import get_db
-
-bp = Blueprint("auth", __name__, url_prefix="/auth")
+bp = f.Blueprint("auth", __name__, url_prefix="/auth")
 
 
 def login_required(view):
@@ -25,8 +15,8 @@ def login_required(view):
 
     @functools.wraps(view)
     def wrapped_view(**kwargs):
-        if g.user is None:
-            return redirect(url_for("auth.login"))
+        if f.g.user is None:
+            return f.redirect(f.url_for("auth.login"))
 
         return view(**kwargs)
 
@@ -37,12 +27,12 @@ def login_required(view):
 def load_logged_in_user():
     """If a user id is stored in the session, load the user object from
     the database into ``g.user``."""
-    username = session.get("username")
+    username = f.session.get("username")
 
     if not username:
-        g.user = None
+        f.g.user = None
     else:
-        g.user = (
+        f.g.user = (
             get_db().execute("SELECT * FROM user WHERE username = ?", (username,)).fetchone()
         )
 
@@ -54,9 +44,9 @@ def register():
     Validates that the username is not already taken. Hashes the
     password for security.
     """
-    if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
+    if f.request.method == "POST":
+        username = f.request.form["username"]
+        password = f.request.form["password"]
         db = get_db()
         error = None
 
@@ -79,39 +69,39 @@ def register():
             else:
                 cb.add_to_room('lobby', username)
                 # Success, go to the login page.
-                return redirect(url_for("auth.login"))
+                return f.redirect(f.url_for("auth.login"))
 
-        flash(error)
+        f.flash(error)
 
-    return render_template("auth/register.html")
+    return f.render_template("auth/register.html")
 
 
 @bp.route("/login", methods=("GET", "POST"))
 def login():
     """Log in a registered user by adding the user id to the session."""
-    if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
+    if f.request.method == "POST":
+        username = f.request.form["username"]
+        password = f.request.form["password"]
         
         error, user = check_user(username, password)
         
 
         if error is None:
             # store the user id in a new session and return to the index
-            session.clear()
-            session["username"] = user["username"]
-            return redirect(url_for("chat.index"))
+            f.session.clear()
+            f.session["username"] = user["username"]
+            return f.redirect(f.url_for("chat.index"))
 
-        flash(error)
+        f.flash(error)
 
-    return render_template("auth/login.html")
+    return f.render_template("auth/login.html")
 
 
 @bp.route("/logout")
 def logout():
     """Clear the current session, including the stored user id."""
-    session.clear()
-    return redirect(url_for("chat.index"))
+    f.session.clear()
+    return f.redirect(f.url_for("chat.index"))
 
 
 def check_user(user, password):
