@@ -20,7 +20,7 @@ chat = Blueprint("chat", __name__, url_prefix='/chat')
 @chat.route('/')
 @login_required
 def index():
-    return render_template("chat_main.html", room_list=cb.get_rooms(g.user["username"]))
+    return render_template("chat/main.html", room_list=cb.get_rooms(g.user["username"]))
     
 
 @chat.route('/new_room', methods=('GET', 'POST'))
@@ -51,7 +51,7 @@ def new_room():
 def room(room_name):
 
     if cb.member_count(room_name) > 0:
-        return render_template("chat.html", room_name=room_name)
+        return render_template("chat/chat.html", room_name=room_name)
     else:
         abort(404)
 
