@@ -1,6 +1,5 @@
 (function () {
-    const chat_id = window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1);
-
+    
     function renderMessages(messages) {
         const container = document.getElementById('container');
         container.innerHTML = '';
