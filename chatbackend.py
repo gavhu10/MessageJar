@@ -19,8 +19,12 @@ def add_message(author, content, room, force=False):
         match command:
             case 'add': # add a user
                 
-                add_to_room(room, args)
-                messages.append( (status_user, f"Added user {args} to the room.", room) )
+                
+                if exsits(args):
+                    add_to_room(room, args)
+                    messages.append( (status_user, f"Added user {args} to the room.", room) )
+                else:
+                    messages.append( (status_user, f"User {args} does not exist!", room) )
             
             case 'delete': # delete room
 
@@ -89,6 +93,21 @@ def add_to_room(room_name, user, isadmin=0):
     db.commit()
     close_db()
 
+
+def exsits(user):
+    """Check if a user exists in the database."""
+    db = get_db()
+
+    r = db.execute(
+        "SELECT * FROM user WHERE username = ?", (user,)
+    ).fetchone()
+
+    close_db()
+
+    if r is None:
+        return False
+    else:
+        return True
 
 
 def get_rooms(user):
