@@ -1,12 +1,12 @@
 import os
 
 
-from flask import Flask, render_template
+import flask as f
 
 
 def create_app(test_config=None):
     """Create and configure an instance of the Flask application."""
-    app = Flask(__name__, instance_relative_config=True)
+    app = f.Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         # a default secret that should be overridden by instance config
         SECRET_KEY="dev",
@@ -28,8 +28,8 @@ def create_app(test_config=None):
         pass
 
     @app.route("/")
-    def hello():
-        return render_template("main.html")
+    def main():
+        return f.render_template("main.html")
 
     # register the database commands
     import db

@@ -17,6 +17,8 @@ CREATE TABLE messages (
   created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   content TEXT NOT NULL,
   room TEXT NOT NULL,
+  edited INTEGER NOT NULL DEFAULT 0, -- TODO: implement editing 
+  deleted INTEGER NOT NULL DEFAULT 0, -- TODO: and deletion
 --  FOREIGN KEY (author) REFERENCES user (username),
  FOREIGN KEY (room) REFERENCES rooms (roomname) ON DELETE CASCADE
 );
