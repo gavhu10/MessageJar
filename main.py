@@ -1,6 +1,5 @@
 import os
 
-from auth import login_required
 
 from flask import Flask, render_template
 
@@ -30,7 +29,7 @@ def create_app(test_config=None):
 
     @app.route("/")
     def hello():
-        return render_template("main_page.html")
+        return render_template("main.html")
 
     # register the database commands
     import db
@@ -47,13 +46,4 @@ def create_app(test_config=None):
 
     app.register_blueprint(chat.chat)
 
-    # make url_for('index') == url_for('blog.index')
-    # in another app, you might define a separate main index here with
-    # app.route, while giving the blog blueprint a url_prefix, but for
-    # the tutorial the blog will be the main index
-    #app.add_url_rule("/", endpoint="index")
-
     return app
-
-
-app = create_app()

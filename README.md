@@ -3,7 +3,7 @@
 ## Todo  
 
  - [ ] better css
- - [ ] multiple rooms
+ - [x] multiple rooms
  - [ ] code comments
 
 Credit:  
