@@ -6,6 +6,7 @@ from flask import render_template
 from flask import request
 from flask import url_for
 from flask import jsonify
+from werkzeug.exceptions import BadRequestKeyError
 from werkzeug.exceptions import abort
 
 from auth import login_required, check_user
@@ -16,13 +17,34 @@ chat = Blueprint("chat", __name__, url_prefix='/chat')
 
 
 
-
-
 @chat.route('/')
 @login_required
 def index():
-    return render_template("chat_main.html")
+    return render_template("chat_main.html", room_list=cb.get_rooms(g.user["username"]))
     
+
+@chat.route('/new_room', methods=('GET', 'POST'))
+@login_required
+def new_room():
+
+    try:
+        room_name = request.form['room_name']
+    except BadRequestKeyError:
+        room_name = None
+
+    if not room_name:
+        return render_template("quick-error.html",
+                                error_message="Room name is required!",
+                                new_location=url_for('chat.index'))
+
+    if cb.member_count(room_name) > 0:
+        return render_template("quick-error.html",
+                                error_message="Room already exists!",
+                                new_location=url_for('chat.index'))
+
+    
+    cb.add_to_room(room_name, g.user["username"], isadmin=1)
+    return redirect(url_for('chat.room', room_name=room_name))
 
 
 @chat.route("/room/<room_name>")
@@ -30,6 +52,8 @@ def room(room_name):
 
     if cb.member_count(room_name) > 0:
         return render_template("chat.html", room_name=room_name)
+    else:
+        abort(404)
 
 @chat.route("/endpoint/<room_name>", methods=("GET", "POST"))
 @login_required
@@ -42,7 +66,6 @@ def endpoint(room_name):
             cb.add_message(str(g.user["username"]), content, room_name)
             return "ok"
     
-    return jsonify("no such room")
 
 
 @chat.route("/api-get")
