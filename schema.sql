@@ -18,7 +18,7 @@ CREATE TABLE messages (
   content TEXT NOT NULL,
   room TEXT NOT NULL,
 --  FOREIGN KEY (author) REFERENCES user (username),
- FOREIGN KEY (room) REFERENCES rooms (roomname)
+ FOREIGN KEY (room) REFERENCES rooms (roomname) ON DELETE CASCADE
 );
 
 CREATE TABLE rooms (

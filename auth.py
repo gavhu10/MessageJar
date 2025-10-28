@@ -77,7 +77,7 @@ def register():
                 # commit to fail. Show a validation error.
                 error = f"User {username} is already registered."
             else:
-                cb.add_to_room('main', username)
+                cb.add_to_room('lobby', username)
                 # Success, go to the login page.
                 return redirect(url_for("auth.login"))
 

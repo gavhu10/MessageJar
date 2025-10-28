@@ -2,27 +2,55 @@ from db import get_db, close_db
 
 status_user = 'Message Jar'
 
-def add_message(author, content, room, force=True):
+def add_message(author, content, room, force=False):
     """Just comment"""
 
     messages = []
-    messages.append((author, content, room))
+    if force or room in get_rooms(author):
+        messages.append((author, content, room))
+    else:
+        return None
+    
 
     if content.startswith('/'):
         command = content[1:].split(' ')[0] # remove the leading slash
-        args = content[1:].split(' ')[1:] # get everything after the command
+        args = ' '.join(content[1:].split(' ')[1:]) # get everything after the command
 
         match command:
             case 'add': # add a user
-                for i in args:
-                    add_to_room(room, i)
-                    messages.append( (status_user, f"Added user {i} to the room.", room) )
+                
+                add_to_room(room, args)
+                messages.append( (status_user, f"Added user {args} to the room.", room) )
             
             case 'delete': # delete room
-                pass
+
+                if not is_admin(author, room) or args != 'yes':
+                    messages.append( (status_user, f"User {author} is not an admin and cannot delete the room.", room) )
+                else:
+
+                    messages.append( (status_user, f"Room {room} has been deleted by admin {author}.", room) )
+                    db = get_db()
+
+                    db.execute('''DELETE FROM rooms
+                                WHERE roomname = ?;''',
+                                (room,))
+                    db.commit()
+                    close_db()
 
             case 'leave': # leave room
-                pass
+                if is_admin(author, room):
+                    messages.append( (status_user, f"Admin {author} cannot leave the room. Use \"/delete yes\" to delete the room", room) )
+                else:
+                    messages.append( (status_user, f"User {author} has left the room.", room) )
+                    db = get_db()
+
+                    db.execute('''DELETE FROM rooms
+                                WHERE roomname = ? AND member = ?;''',
+                                (room, author))
+                    db.commit()
+                    close_db()
+
+
     db = get_db()
 
     print(messages)
@@ -35,7 +63,6 @@ def add_message(author, content, room, force=True):
 
     print(content)
 
-   
 
     
 def member_count(room):
@@ -75,6 +102,24 @@ def get_rooms(user):
     rooms = [r['roomname'] for r in rooms]
 
     return rooms
+
+
+def is_admin(user, room):
+    """Check if a user is an admin of a room."""
+    db = get_db()
+
+    r = db.execute('''
+    SELECT isadmin
+    FROM rooms
+    WHERE roomname = ? AND member = ?;''',
+    (room, user)).fetchone()
+
+    close_db()
+
+    if r and r['isadmin'] == 1:
+        return True
+    else:
+        return False
 
 
 def get_messages(room, last_seen=0):
