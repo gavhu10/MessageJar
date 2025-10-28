@@ -1,14 +1,41 @@
 from db import get_db, close_db
 
-def add_message(author, content, room):
+status_user = 'Message Jar'
+
+def add_message(author, content, room, force=True):
     """Just comment"""
+
+    messages = []
+    messages.append((author, content, room))
+
+    if content.startswith('/'):
+        command = content[1:].split(' ')[0] # remove the leading slash
+        args = content[1:].split(' ')[1:] # get everything after the command
+
+        match command:
+            case 'add': # add a user
+                for i in args:
+                    add_to_room(room, i)
+                    messages.append( (status_user, f"Added user {i} to the room.", room) )
+            
+            case 'delete': # delete room
+                pass
+
+            case 'leave': # leave room
+                pass
     db = get_db()
 
-    db.execute("INSERT INTO messages (author, content, room) VALUES (?, ?, ?)",
-                (author, content, room))
+    print(messages)
+
+    db.executemany("INSERT INTO messages (author, content, room) VALUES (?, ?, ?)",
+                messages)
     db.commit()
 
     close_db()
+
+    print(content)
+
+   
 
     
 def member_count(room):
@@ -23,7 +50,7 @@ def member_count(room):
     return r[0]
     
 
-def add_to_room(name, user, isadmin=0):
+def add_to_room(room_name, user, isadmin=0):
     """Add a user to a room.
     The way that the database is set up means that to add someone to a non-existent room 
     means that the room will be created. 
@@ -31,11 +58,10 @@ def add_to_room(name, user, isadmin=0):
     db = get_db()
 
     db.execute("INSERT INTO rooms (roomname, member, isadmin) VALUES (?, ?, ?)",
-                (name, user, isadmin))
+                (room_name, user, isadmin))
     db.commit()
     close_db()
 
-    add_message("Status", "Welcome to your room!", name)
 
 
 def get_rooms(user):
