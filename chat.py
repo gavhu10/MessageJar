@@ -5,6 +5,8 @@ from auth import login_required, check_user
 
 import chatbackend as cb
 
+status_user = 'Message Jar'
+
 chat = f.Blueprint("chat", __name__, url_prefix='/chat')
 
 
@@ -36,6 +38,7 @@ def new_room():
 
     
     cb.add_to_room(room_name, f.g.user["username"], isadmin=1)
+    cb.add_to_room(room_name, status_user)
     return f.redirect(f.url_for('chat.room', room_name=room_name))
 
 
