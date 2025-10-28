@@ -1,115 +1,104 @@
-from flask import Blueprint
-from flask import flash
-from flask import g
-from flask import redirect
-from flask import render_template
-from flask import request
-from flask import url_for
-from flask import jsonify
-from werkzeug.exceptions import abort
+import flask as f
+from werkzeug.exceptions import BadRequestKeyError, abort
 
 from auth import login_required, check_user
-from db import get_db, close_db
 
-chat = Blueprint("chat", __name__, url_prefix='/chat')
+import chatbackend as cb
 
-def add_message(author, content):
-    db = get_db()
+status_user = 'Message Jar'
 
-    db.execute("INSERT INTO messages (author, content) VALUES (?, ?)", (author, content))
-    db.commit()
-
-    close_db()
-
-
-
-
-def get_messages(last_seen=0):
-    db = get_db()
-
-    latest = db.execute('SELECT MAX(id) AS latest_id FROM messages;').fetchone()['latest_id']
-    if not latest: latest = 0
-
-    print(latest)
-    
-    if not last_seen:
-        if int(latest) > 30:
-            last_seen = latest - 30
-    
-    results = db.execute("""
-        SELECT m.id, m.author, m.created, m.content
-        FROM messages m
-        JOIN user u ON m.author = u.username
-        ORDER BY m.created ASC
-    """)
-
-    row_headers = [x[0] for x in results.description]
-
-    json_data = []
-
-    rv = results.fetchall()
-
-    close_db()
-
-    for result in rv:
-        json_data.append(dict(zip(row_headers,result)))
-    return jsonify(json_data)
+chat = f.Blueprint("chat", __name__, url_prefix='/chat')
 
 
 
 @chat.route('/')
 @login_required
 def index():
-    return render_template("chat.html")
+    return f.render_template("chat/main.html", room_list=cb.get_rooms(f.g.user["username"]))
     
 
-@chat.route("/endpoint", methods=("GET", "POST"))
+@chat.route('/new_room', methods=('GET', 'POST'))
 @login_required
-def endpoint():
-    if request.method == 'GET':
-        return get_messages()
-    elif request.method == 'POST':
-        content = request.form["message"]
-        add_message(str(g.user["username"]), content)
-        return "ok"
+def new_room():
+
+    try:
+        room_name = f.request.form['room_name']
+    except BadRequestKeyError:
+        room_name = None
+
+    if not room_name:
+        return f.render_template("quick-error.html",
+                                error_message="Room name is required!",
+                                new_location=f.url_for('chat.index'))
+
+    if cb.member_count(room_name) > 0:
+        return f.render_template("quick-error.html",
+                                error_message="Room already exists!",
+                                new_location=f.url_for('chat.index'))
+
+    
+    cb.add_to_room(room_name, f.g.user["username"], isadmin=1)
+    cb.add_to_room(room_name, status_user)
+    return f.redirect(f.url_for('chat.room', room_name=room_name))
+
+
+@chat.route("/room/<room_name>")
+def room(room_name):
+
+    if cb.member_count(room_name) > 0:
+        return f.render_template("chat/chat.html", room_name=room_name)
+    else:
+        abort(404)
+
+@chat.route("/endpoint/<room_name>", methods=("GET", "POST"))
+@login_required
+def endpoint(room_name):
+    if cb.member_count(room_name) > 0:
+        if f.request.method == 'GET':
+            return f.jsonify(cb.get_messages(room_name))
+        elif f.request.method == 'POST':
+            content = f.request.form["message"]
+            cb.add_message(str(f.g.user["username"]), content, room_name)
+            return "ok"
+    
 
 
 @chat.route("/api-get")
 def api_get():
 
-    username = request.form["username"]
-    password = request.form["password"]
+    username = f.request.form["username"]
+    password = f.request.form["password"]
+    room = f.request.form["room"]
     error = None
 
-
-
-    error, user = check_user(username, password)
+    error, _ = check_user(username, password)
 
     if error is not None:
         return "Error"+str(error)
     else:
 
-        return get_messages()
+        return f.jsonify(cb.get_messages(room))
 
 
 @chat.route("/api-send", methods=["POST"])
 def send():
   
-    username = request.form["username"]
-    password = request.form["password"]
-    message = request.form["message"]
+    username = f.request.form["username"]
+    password = f.request.form["password"]
+    message = f.request.form["message"]
+    room = f.request.form["room"]
     error = None
 
     if not message:
-        error = "Title is required."
+        error = "No message!"
 
     error, user = check_user(username, password)
 
     if error is not None:
-        return "Error"+str(error)
+        return "Error "+str(error)
     else:
         
-        add_message(user["username"], message)
-        return redirect(url_for("chat.index"))
+        cb.add_message(user["username"], message, room)
+        return f.redirect(f.url_for("chat.index"))
 
 

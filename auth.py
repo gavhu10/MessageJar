@@ -1,6 +1,8 @@
 import functools
 
-from flask import Blueprint
+status_user = 'Message Jar'
+
+from flask import Blueprint # TODO fix imports
 from flask import flash
 from flask import g
 from flask import redirect
@@ -10,6 +12,8 @@ from flask import session
 from flask import url_for
 from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
+
+import chatbackend as cb
 
 from db import get_db
 
@@ -21,7 +25,6 @@ def login_required(view):
 
     @functools.wraps(view)
     def wrapped_view(**kwargs):
-        print(g.user)
         if g.user is None:
             return redirect(url_for("auth.login"))
 
@@ -74,6 +77,7 @@ def register():
                 # commit to fail. Show a validation error.
                 error = f"User {username} is already registered."
             else:
+                cb.add_to_room('lobby', username)
                 # Success, go to the login page.
                 return redirect(url_for("auth.login"))
 
@@ -113,14 +117,18 @@ def logout():
 def check_user(user, password):
     db = get_db()
     error = None
-    user = db.execute(
+
+    r = db.execute(
         "SELECT * FROM user WHERE username = ?", (user,)
     ).fetchone()
 
-    if user is None:
+    if r is None:
         error = "Incorrect username."
-        user = ''
-    elif not check_password_hash(user["password"], password):
+        r = ''
+    elif not check_password_hash(r["password"], password):
         error = "Incorrect password." # TODO security risk
+    elif user == status_user:
+        error = "Nice try."
+        r = ''
 
-    return (error, user)
+    return (error, r)

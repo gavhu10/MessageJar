@@ -2,9 +2,7 @@ import sqlite3
 from datetime import datetime
 
 import click
-from flask import current_app
-from flask import g
-
+from flask import current_app, g
 
 def get_db():
     """Connect to the application's configured database. The connection
@@ -45,7 +43,7 @@ def init_db_command():
     click.echo("Initialized the database.")
 
 
-sqlite3.register_converter("timestamp", lambda v: datetime.fromisoformat(v.decode()))
+sqlite3.register_converter("timestamp", lambda v: datetime.fromisoformat(v.decode())) # TODO set time zone
 
 
 def init_app(app):

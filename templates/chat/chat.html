@@ -15,5 +15,9 @@
 
 <button type="button" id="sendMessageButton" class="btn btn-primary">Send</button>
 
+<script>
+  window.room_name = "{{ room_name }}"
+</script>
+
 <script src="{{ url_for('static', filename='chat.js') }}"></script>
 {% endblock %}
