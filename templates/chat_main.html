@@ -6,5 +6,20 @@
 
 {% block content %}
 <br>
-Hi! This a chat room by gavhu10. The main chat is <a href="{{ url_for('chat.room', room_name=main) }}">here.
+This a chat room site by gavhu10. 
+Here are the chat rooms you are in:
+
+
+<div id="room-links">
+{% for i in room_list %}
+<p><a href="{{ url_for('chat.room', room_name=i) }}">{{ i }}</a></p>
+{% endfor %}
+</div>
+
+<br>
+To create a new room, fill in the form below:
+<form action="{{ url_for('chat.new_room') }}" method="post">
+    <input type="text" name="room_name" placeholder="Room Name" autocomplete="off" required>
+    <input type="submit" value="Add Room">
+</form>
 {% endblock %}

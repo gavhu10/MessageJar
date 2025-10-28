@@ -38,6 +38,19 @@ def add_to_room(name, user, isadmin=0):
     add_message("Status", "Welcome to your room!", name)
 
 
+def get_rooms(user):
+    db = get_db()
+
+    rooms = db.execute('''
+    SELECT DISTINCT roomname
+    FROM rooms
+    WHERE member = ?;''', (user,)).fetchall()
+
+    rooms = [r['roomname'] for r in rooms]
+
+    return rooms
+
+
 def get_messages(room, last_seen=0):
     """Get all the messages from a room and return them as a list. 
     Use flask.jsonify(get_messages()) to return this as a  page
