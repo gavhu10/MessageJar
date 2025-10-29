@@ -1,4 +1,4 @@
-# Simple chat room app
+# Message Jar chat room app
 
 ## Todo  
 

@@ -1,8 +1,8 @@
 <!doctype html>
-<title>{% block title %}{% endblock %} - Simple Chat</title>
+<title>{% block title %}{% endblock %} - Message Jar</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <nav>
-  <h1><a href="{{ url_for('chat.index') }}">Simple Chat</a></h1>
+  <h1><a href="{{ url_for('chat.index') }}">Message Jar</a></h1>
   <ul>
     {% if g.user %}
       <li><span>{{ g.user['username'] }}</span>
