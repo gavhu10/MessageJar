@@ -55,7 +55,15 @@ def room(room_name):
 def endpoint(room_name):
     if cb.member_count(room_name) > 0:
         if f.request.method == 'GET':
-            return f.jsonify(cb.get_messages(room_name))
+
+            try:
+                latest = int(f.request.args.get("latest", 0))
+            except (ValueError, TypeError):
+                latest = 0
+            
+
+            return f.jsonify(cb.get_messages(room_name, latest))
+        
         elif f.request.method == 'POST':
             content = f.request.form["message"]
             cb.add_message(str(f.g.user["username"]), content, room_name)
