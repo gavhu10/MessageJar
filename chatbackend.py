@@ -163,17 +163,21 @@ def get_messages(room, last_seen=0):
     if not latest: latest = 0
 
     
-    if not last_seen:
-        if int(latest) > 30:
-            last_seen = latest - 30
+    if last_seen == 0:
+        last_seen = latest + 1
+    else:
+        last_seen = latest - last_seen
+        if last_seen < 0:
+            last_seen = 0
     
     results = db.execute("""
         SELECT m.id, m.author, m.created, m.content
         FROM messages m
         JOIN user u ON m.author = u.username
         WHERE room = ?
-        ORDER BY m.created ASC
-    """, (room,))
+        ORDER BY m.created DESC
+        LIMIT ?
+    """, (room, last_seen))
 
     row_headers = [x[0] for x in results.description]
 
