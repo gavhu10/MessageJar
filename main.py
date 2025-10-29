@@ -47,3 +47,6 @@ def create_app(test_config=None):
     app.register_blueprint(chat.chat)
 
     return app
+
+
+app = create_app()
