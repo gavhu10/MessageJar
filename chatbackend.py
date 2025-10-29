@@ -1,5 +1,8 @@
 from db import get_db, close_db
 
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
 status_user = 'Message Jar'
 
 def add_message(author, content, room, force=False):
@@ -68,6 +71,10 @@ def add_message(author, content, room, force=False):
     print(content)
 
 
+def to_gmt(time):
+    """Convert a datetime.datetime object to GMT time string."""
+    r = time.astimezone(ZoneInfo("America/New_York"))
+    return str(r)[:-6]
     
 def member_count(room):
     """duh"""
@@ -179,4 +186,7 @@ def get_messages(room, last_seen=0):
     for result in rv:
         json_data.append(dict(zip(row_headers,result)))
 
+    for i in json_data:
+        i['created'] = to_gmt(i['created'])
+        
     return json_data
