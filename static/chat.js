@@ -10,6 +10,7 @@
             p.textContent = text;
             container.appendChild(p);
         }
+        scrollToBottom();
     }
 
 
@@ -34,15 +35,10 @@
             // If no messages return early
             if (!all.length) return;
 
-            // First load: lastSeenId===0 -> render history (optionally only last 30)
             if (window.lastSeenId === 0) {
 
 
-                // render only the last 30 messages (or change 30 to any number)
-                //const start = Math.max(0, all.length - 30);
-                //const initial = all.slice(start);
-
-                const initial = all; // sike! just render all messages, but this may change
+                const initial = all; // just render all messages, but this may change
 
                 renderMessages(initial);
                 // set lastSeenId to highest id now
@@ -77,9 +73,9 @@
             if (!res.ok) throw new Error('Network response was not ok');
             return res.json().catch(function () { return null; });
         }).then(function () {
-            // immediately poll for new messages after sending
-            getMessages();
-            window.lastSeenId++;
+            // // immediately poll for new messages after sending
+            // getMessages();
+            // window.lastSeenId++; // this code causes duplicate messages, so commenting out for now
         }).catch(function (err) {
             console.error('Failed to send message:', err);
         });

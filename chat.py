@@ -71,13 +71,24 @@ def endpoint(room_name):
     
 
 
+# ========== Note: API endpoints have not been tested; they may not work and they are unstable ==========
+
 @chat.route("/api-get")
 def api_get():
 
-    username = f.request.form["username"]
-    password = f.request.form["password"]
-    room = f.request.form["room"]
+    
+    username = f.request.args.get("username")
+    password = f.request.args.get("password")
+    room = f.requestargs.get("room")
     error = None
+
+    try:
+        latest = int(f.request.args.get("latest", 0))
+    except (ValueError, TypeError):
+        latest = 0
+
+    if not room or not username or not password:
+        error = "Missing arguments!"
 
     error, _ = check_user(username, password)
 
