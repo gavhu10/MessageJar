@@ -1,10 +1,13 @@
 # Message Jar chat room app
 
+![Message Jar logo](https://raw.githubusercontent.com/gavhu10/MessageJar/refs/heads/main/static/jar.svg)
+
 ## Todo  
 
  - [ ] better css
  - [x] multiple rooms
  - [ ] code comments
+ - [ ] create client for [cardputer](https://github.com/terremoth/awesome-m5stack-cardputer)
 
 Credit:  
   
