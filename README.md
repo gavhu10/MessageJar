@@ -4,7 +4,7 @@
 
 ## Todo  
 
- - [ ] better css
+ - [x] better css
  - [x] multiple rooms
  - [ ] code comments
  - [ ] create client for [cardputer](https://github.com/terremoth/awesome-m5stack-cardputer)
