@@ -1,13 +1,24 @@
 (function () {
     window.lastSeenId = 0;
 
-    function renderMessages(messages) {
+    function renderMessages(messages) { // still need to fix some timezone things
         const container = document.getElementById('container');
+        
+
         for (let i = messages.length - 1; i >= 0; i--) {
             const m = messages[i];
-            const text = (m.author || "Error getting author") + ": " + (m.content || "Error getting message");
+            const author = m.author || "Error getting author";
+            const content = m.content || "Error getting message";
+
             const p = document.createElement('p');
-            p.textContent = text;
+            p.className = 'message';
+            p.textContent = author + ': ' + content;
+
+            const ts = document.createElement('span');
+            ts.className = 'ts';
+            ts.textContent = m.created ? m.created : 'No timestamp';
+            p.appendChild(ts);
+
             container.appendChild(p);
         }
         scrollToBottom();
