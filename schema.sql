@@ -31,3 +31,4 @@ CREATE TABLE rooms (
 );
 
 INSERT INTO user (username, password) VALUES ("Message Jar", "I am good at choosing passwords");
+INSERT INTO rooms (roomname, member) VALUES ("lobby", "Message Jar");
