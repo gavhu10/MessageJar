@@ -35,7 +35,7 @@ def add_message(author, content, room, force=False):
                 
                 if user_exists(args):
                     add_to_room(room, args)
-                    notify(f"Added user {args} to the room.", room)
+                    notify(f"{author} added user {args} to the room.", room)
                     return None  # all these return None statements are becuse adding two messages at once breaks the ordering
                 else:
                     notify(f"User {args} does not exist!", room)
@@ -93,6 +93,7 @@ def to_est(time):
     """Convert a datetime.datetime object to GMT time string."""
     r = time.astimezone(ZoneInfo("America/New_York"))
     return str(r)[:-6]
+
     
 def member_count(room):
     """duh"""
