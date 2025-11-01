@@ -8,6 +8,7 @@
  - [x] multiple rooms
  - [ ] code comments
  - [ ] create client for [cardputer](https://github.com/terremoth/awesome-m5stack-cardputer)
+ - [ ] optimize for mobile use
 
 Credit:  
   
