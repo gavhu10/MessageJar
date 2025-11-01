@@ -46,6 +46,10 @@
             // If no messages return early
             if (!all.length) return;
 
+            // We are here so we have messages
+
+            notifyPing();
+
             if (window.lastSeenId === 0) {
 
 
@@ -95,6 +99,37 @@
     function scrollToBottom() {
         window.scrollTo(0, document.body.scrollHeight);
     }
+
+
+    function notifyPing() {
+        if (!_ctx) enable();
+        const t = _ctx.currentTime;
+        const o = _ctx.createOscillator();
+        const g = _ctx.createGain();
+        o.type = 'sine';
+        o.frequency.setValueAtTime(900, t);
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.9, t + 0.01);   // louder peak (0..1)
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);  // decay
+        o.connect(g);
+        g.connect(_master); // route through master gain
+        o.start(t);
+        o.stop(t + 0.42);
+        o.onended = () => { o.disconnect(); g.disconnect(); };
+    }
+
+
+    let _ctx, _master;
+    function enable() {
+        _ctx = _ctx || new (window.AudioContext || window.webkitAudioContext)();
+        if (!_ctx.state === 'suspended') _ctx.resume().catch(() => { });
+        if (!_master) {
+            _master = _ctx.createGain();
+            _master.gain.value = 0.6; // overall volume 0..1 (set lower to avoid clipping)
+            _master.connect(_ctx.destination);
+        }
+    }
+
 
     document.getElementById('toTheBottom').addEventListener('click', scrollToBottom);
 
