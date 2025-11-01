@@ -39,6 +39,8 @@ def new_room():
     
     cb.add_to_room(room_name, f.g.user["username"], isadmin=1)
     cb.add_to_room(room_name, status_user)
+    cb.notify(f'Room {room_name} created by {f.g.user['username']}. Commands: Use "/delete yes" to delete the room.\
+              Use "/add user" to add a user. Use "/leave" to leave the room.', room_name)
     return f.redirect(f.url_for('chat.room', room_name=room_name))
 
 
