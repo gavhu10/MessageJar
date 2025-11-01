@@ -3,7 +3,7 @@
 
     function renderMessages(messages) { // still need to fix some timezone things
         const container = document.getElementById('container');
-        
+
 
         for (let i = messages.length - 1; i >= 0; i--) {
             const m = messages[i];
@@ -97,7 +97,8 @@
     }
 
     function scrollToBottom() {
-        window.scrollTo(0, document.body.scrollHeight);
+        var objDiv = document.getElementById("container");
+        objDiv.scrollTop = objDiv.scrollHeight;
     }
 
 
