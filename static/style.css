@@ -178,6 +178,18 @@ input[type=submit] {
   margin-bottom: 10px;
 }
 
+@media (min-width:320px) and (max-width:480px) {
+  #toTheBottom {
+    position: relative;
+    bottom: 35px;
+    right: -110px;
+  }
+
+  nav h1 {
+    font-size: 17px;
+  }
+}
+
 /* #room-links a {
   padding: 5px;
   margin: 25px;
