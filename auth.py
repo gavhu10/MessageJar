@@ -5,7 +5,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import chatbackend as cb
 from db import get_db
 
-status_user = 'Message Jar'
+status_user = "Message Jar"
 
 bp = f.Blueprint("auth", __name__, url_prefix="/auth")
 
@@ -33,7 +33,9 @@ def load_logged_in_user():
         f.g.user = None
     else:
         f.g.user = (
-            get_db().execute("SELECT * FROM user WHERE username = ?", (username,)).fetchone()
+            get_db()
+            .execute("SELECT * FROM user WHERE username = ?", (username,))
+            .fetchone()
         )
 
 
@@ -67,7 +69,7 @@ def register():
                 # commit to fail. Show a validation error.
                 error = f"User {username} is already registered."
             else:
-                cb.add_to_room('lobby', username)
+                cb.add_to_room("lobby", username)
                 # Success, go to the login page.
                 return f.redirect(f.url_for("auth.login"))
 
@@ -82,9 +84,8 @@ def login():
     if f.request.method == "POST":
         username = f.request.form["username"]
         password = f.request.form["password"]
-        
+
         error, user = check_user(username, password)
-        
 
         if error is None:
             # store the user id in a new session and return to the index
@@ -108,17 +109,15 @@ def check_user(user, password):
     db = get_db()
     error = None
 
-    r = db.execute(
-        "SELECT * FROM user WHERE username = ?", (user,)
-    ).fetchone()
+    r = db.execute("SELECT * FROM user WHERE username = ?", (user,)).fetchone()
 
     if r is None:
         error = "Incorrect username."
-        r = ''
+        r = ""
     elif not check_password_hash(r["password"], password):
-        error = "Incorrect password." # TODO security risk
+        error = "Incorrect password."  # TODO security risk
     elif user == status_user:
         error = "Nice try."
-        r = ''
+        r = ""
 
     return (error, r)

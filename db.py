@@ -4,6 +4,7 @@ from datetime import datetime
 import click
 import flask as f
 
+
 def get_db():
     """Connect to the application's configured database. The connection
     is unique for each request and will be reused if this is called
@@ -43,7 +44,9 @@ def init_db_command():
     click.echo("Initialized the database.")
 
 
-sqlite3.register_converter("timestamp", lambda v: datetime.fromisoformat(v.decode())) # TODO set time zone
+sqlite3.register_converter(
+    "timestamp", lambda v: datetime.fromisoformat(v.decode())
+)  # TODO set time zone
 
 
 def init_app(app):

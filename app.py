@@ -38,10 +38,9 @@ def create_app(test_config=None):
 
     # apply the blueprints to the app
     import auth
- 
 
     app.register_blueprint(auth.bp)
- 
+
     import chat
 
     app.register_blueprint(chat.chat)
