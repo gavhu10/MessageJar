@@ -4,5 +4,5 @@ Things to be done before 1.0 release:
  - [ ] Test and improve api
  - [ ] List features on README
  - [ ] Provide install instructions
- - [ ] Add licence
+ - [x] Add licence
  - [ ] Dark mode?
