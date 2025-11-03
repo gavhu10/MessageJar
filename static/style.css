@@ -178,7 +178,7 @@ input[type=submit] {
   margin-bottom: 10px;
 }
 
-@media (min-width:320px) and (max-width:480px) {
+@media (max-width:480px) {
   #toTheBottom {
     position: relative;
     bottom: 35px;
