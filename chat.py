@@ -101,7 +101,7 @@ def api_get():
             args[key] = f.request.args.get(key)
 
     try:
-        latest = int(args['latest'])
+        latest = int(args["latest"])
     except (ValueError, TypeError):
         latest = 0
 
@@ -116,18 +116,17 @@ def api_get():
             error = f"Missing argument: {key}"
             return "Error: " + str(error)
 
-    error, _ = check_user(args["username"], args['password'])
+    error, _ = check_user(args["username"], args["password"])
 
     if error is not None:
         return "Error: " + str(error)
     else:
 
-        return f.jsonify(cb.get_messages(args['room']))
+        return f.jsonify(cb.get_messages(args["room"]))
 
 
 @chat.route("/api-send", methods=["POST", "GET"])
 def send():
-
 
     args = {
         "username": "",
@@ -148,16 +147,16 @@ def send():
             error = f"Missing argument: {key}"
             return "Error: " + str(error)
 
-    error, _ = check_user(args['username'], args['password'])
+    error, _ = check_user(args["username"], args["password"])
 
-    rooms = cb.get_rooms(args['username'])
+    rooms = cb.get_rooms(args["username"])
 
     if error is not None:
         return "Error: " + str(error)
     else:
 
-        if args['username'] not in rooms:
+        if args["username"] not in rooms:
             return "Error: User not in room."
 
-        cb.add_message(args['username'], args['message'], args['room'])
+        cb.add_message(args["username"], args["message"], args["room"])
         return f.redirect(f.url_for("chat.index"))
