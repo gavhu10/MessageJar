@@ -97,6 +97,7 @@ def add_message(author, content, room, force=False):
     print(content)
 
 
+# Note: you may need to cripple this funcion if you alreay are in the EST timezone
 def to_est(time):
     """Convert a datetime.datetime object to GMT time string."""
     r = time.astimezone(ZoneInfo("America/New_York"))
@@ -182,7 +183,7 @@ def is_admin(user, room):
         return False
 
 
-def get_messages(room, last_seen=0):
+def get_messages(room, last_seen=0):  # TODO: fix message ordering
     """Get all the messages from a room and return them as a list.
     Use flask.jsonify(get_messages()) to return this as a  page
     """
