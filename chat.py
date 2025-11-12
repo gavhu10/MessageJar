@@ -82,48 +82,82 @@ def endpoint(room_name):
 # ========== Note: API endpoints have not been tested; they may not work and they are unstable ==========
 
 
-@chat.route("/api-get")
+@chat.route("/api-get", methods=["GET", "POST"])
 def api_get():
 
-    username = f.request.args.get("username")
-    password = f.request.args.get("password")
-    room = f.requestargs.get("room")
-    error = None
+    args = {
+        "username": "",
+        "password": "",
+        "latest": "",
+        "room": "",
+    }
+
+    optional = ["latest"]
+
+    for key, value in args.items():
+        if f.request.method == "POST":
+            args[key] = f.request.form.get(key)
+        elif f.request.method == "GET":
+            args[key] = f.request.args.get(key)
 
     try:
-        latest = int(f.request.args.get("latest", 0))
+        latest = int(args['latest'])
     except (ValueError, TypeError):
         latest = 0
 
-    if not room or not username or not password:
-        error = "Missing arguments!"
+    for key, value in args.items():
 
-    error, _ = check_user(username, password)
+        if key in optional:
+            continue
+
+        print(f"{key}: {value}")
+        print(f"stored: {key}: {args[key]}")
+        if not value:
+            error = f"Missing argument: {key}"
+            return "Error: " + str(error)
+
+    error, _ = check_user(args["username"], args['password'])
 
     if error is not None:
-        return "Error" + str(error)
+        return "Error: " + str(error)
     else:
 
-        return f.jsonify(cb.get_messages(room))
+        return f.jsonify(cb.get_messages(args['room']))
 
 
-@chat.route("/api-send", methods=["POST"])
+@chat.route("/api-send", methods=["POST", "GET"])
 def send():
 
-    username = f.request.form["username"]
-    password = f.request.form["password"]
-    message = f.request.form["message"]
-    room = f.request.form["room"]
-    error = None
 
-    if not message:
-        error = "No message!"
+    args = {
+        "username": "",
+        "password": "",
+        "message": "",
+        "room": "",
+    }
 
-    error, user = check_user(username, password)
+    for key, value in args.items():
+        if f.request.method == "POST":
+            args[key] = f.request.form.get(key)
+        elif f.request.method == "GET":
+            args[key] = f.request.args.get(key)
+
+    for key, value in args.items():
+        print(f"{key}: {value}")
+        if not value:
+            error = f"Missing argument: {key}"
+            return "Error: " + str(error)
+
+    error, _ = check_user(args['username'], args['password'])
+
+    rooms = cb.get_rooms(args['username'])
 
     if error is not None:
-        return "Error " + str(error)
+        return "Error: " + str(error)
     else:
 
-        cb.add_message(user["username"], message, room)
+        if args['username'] not in rooms:
+            return "Error: User not in room."
+
+        cb.add_message(args['username'], args['message'], args['room'])
         return f.redirect(f.url_for("chat.index"))

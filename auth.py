@@ -116,7 +116,8 @@ def check_user(user, password):
         r = ""
     elif not check_password_hash(r["password"], password):
         error = "Incorrect password."  # TODO security risk
-    elif user == status_user:
+        r = ""
+    if user == status_user:
         error = "Nice try."
         r = ""
 
