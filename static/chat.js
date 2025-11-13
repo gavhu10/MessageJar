@@ -5,7 +5,8 @@
         const container = document.getElementById('container');
 
 
-        for (let i = messages.length - 1; i >= 0; i--) {
+        for (let i = messages.length - 1; i >= 0; --i) {
+            console.log("in renderMessages loop i=", i);
             const m = messages[i];
             const author = m.author || "Error getting author";
             const content = m.content || "Error getting message";
@@ -27,9 +28,8 @@
 
     function updateLastSeenFrom(allMessages) {
         if (!Array.isArray(allMessages) || allMessages.length === 0) return;
-        // array is decending by id, so first element has highest id
-        const last = allMessages[0];
-        window.lastSeenId = Number(last.id) || window.lastSeenId;
+        const last = allMessages[allMessages.length - 1]; // get the id of the last message
+        window.lastSeenId = window.lastSeenId + Number(last.id) + 1 || window.lastSeenId;
     }
 
     function getMessages() {
@@ -99,6 +99,7 @@
     function scrollToBottom() {
         var objDiv = document.getElementById("container");
         objDiv.scrollTop = objDiv.scrollHeight;
+        console.log("scrolled to bottom");
     }
 
 
