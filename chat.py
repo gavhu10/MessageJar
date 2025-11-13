@@ -1,7 +1,7 @@
 import flask as f
 from werkzeug.exceptions import BadRequestKeyError, abort
 
-from auth import login_required, check_user
+from auth import login_required, check_user, register_user
 
 import chatbackend as cb
 
@@ -41,13 +41,7 @@ def new_room():
             new_location=f.url_for("chat.index"),
         )
 
-    cb.add_to_room(room_name, f.g.user["username"], isadmin=1)
-    cb.add_to_room(room_name, status_user)
-    cb.notify(
-        f'Room {room_name} created by {f.g.user['username']}. Commands: Use "/delete yes" to delete the room.\
-              Use "/add user" to add a user. Use "/leave" to leave the room.',
-        room_name,
-    )
+    cb.create_room(room_name, f.g.user["username"])
     return f.redirect(f.url_for("chat.room", room_name=room_name))
 
 
@@ -77,9 +71,6 @@ def endpoint(room_name):
             content = f.request.form["message"]
             cb.add_message(str(f.g.user["username"]), content, room_name)
             return "ok"
-
-
-# ========== Note: API endpoints have not been tested; they may not work and they are unstable ==========
 
 
 @chat.route("/api-get", methods=["GET", "POST"])
@@ -122,11 +113,11 @@ def api_get():
         return "Error: " + str(error)
     else:
 
-        return f.jsonify(cb.get_messages(args["room"]))
+        return f.jsonify(cb.get_messages(args["room"], latest))
 
 
 @chat.route("/api-send", methods=["POST", "GET"])
-def send():
+def api_send():
 
     args = {
         "username": "",
@@ -160,3 +151,41 @@ def send():
 
         cb.add_message(args["username"], args["message"], args["room"])
         return f.redirect(f.url_for("chat.index"))
+
+
+@chat.route("/api-manage", methods=["GET", "POST"])
+def api_manage():
+    args = {
+        "username": "",
+        "password": "",
+        "action": "",
+        "room": "",
+    }
+
+    optional = ["room"]
+
+    for key, value in args.items():
+        if f.request.method == "POST":
+            args[key] = f.request.form.get(key)
+        elif f.request.method == "GET":
+            args[key] = f.request.args.get(key)
+
+    
+    for key, value in args.items():
+
+        if key in optional:
+            continue
+
+        print(f"{key}: {value}")
+        print(f"stored: {key}: {args[key]}")
+        if not value:
+            error = f"Missing argument: {key}"
+            return "Error: " + str(error)
+        
+        match args["action"]:
+            case "new_user":
+                register_user(args["room"], args["username"])
+            case "new_room":
+                cb.create_room(args["room"], args["username"])
+            case _:
+                return "Error: Invalid action."
