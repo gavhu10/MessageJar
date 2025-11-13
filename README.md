@@ -1,4 +1,6 @@
-# Message Jar chat room app
+# Message Jar
+
+A web app messaging application built with python and flask
 
 ![Message Jar logo](https://raw.githubusercontent.com/gavhu10/MessageJar/refs/heads/main/static/jar.svg)
 

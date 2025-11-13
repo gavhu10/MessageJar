@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  <h1>{% block title %}Chat{% endblock %}</h1>
+  <h1>{% block title %}Jar{% endblock %}</h1>
 {% endblock %}
 
 {% block content %}
@@ -19,5 +19,5 @@
   window.room_name = "{{ room_name }}"
 </script>
 
-<script src="{{ url_for('static', filename='chat.js') }}"></script>
+<script src="{{ url_for('static', filename='jars.js') }}"></script>
 {% endblock %}

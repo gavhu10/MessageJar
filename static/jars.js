@@ -33,7 +33,7 @@
     }
 
     function getMessages() {
-        return fetch('/chat/endpoint/' + window.room_name + '?latest=' + window.lastSeenId, {
+        return fetch('/jar/endpoint/' + window.room_name + '?latest=' + window.lastSeenId, {
             method: 'GET',
             credentials: 'include',
             headers: { 'Accept': 'application/json' }
@@ -79,7 +79,7 @@
         formData.append('message', messageText);
         input.value = '';
 
-        fetch('/chat/endpoint/' + window.room_name, {
+        fetch('/jar/endpoint/' + window.room_name, {
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

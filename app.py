@@ -41,9 +41,9 @@ def create_app(test_config=None):
 
     app.register_blueprint(auth.bp)
 
-    import chat
+    import jar
 
-    app.register_blueprint(chat.chat)
+    app.register_blueprint(jar.jar)
 
     return app
 
