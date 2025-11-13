@@ -8,9 +8,8 @@ A web app messaging application built with python and flask
 
  - [x] better css
  - [x] multiple rooms
- - [ ] code comments
  - [ ] create client for [cardputer](https://github.com/terremoth/awesome-m5stack-cardputer)
- - [ ] optimize for mobile use
+ - [x] optimize for mobile use
 
  [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
