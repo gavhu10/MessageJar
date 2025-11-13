@@ -183,54 +183,42 @@ def is_admin(user, room):
         return False
 
 
-def get_messages(room, last_seen=0):  # TODO: fix message ordering
+def get_messages(room, message_num=0):
     """Get all the messages from a room and return them as a list.
-    Use flask.jsonify(get_messages()) to return this as a  page
+    Use flask.jsonify(get_messages()) to return this as a page
     """
     db = get_db()
 
-    latest = db.execute(
-        """
-        SELECT MAX(id) 
-        AS latest_id FROM messages 
-        WHERE room = ?;""",
-        (room,),
-    ).fetchone()["latest_id"]
 
-    if not latest:
-        latest = 0
-
-    if last_seen == 0:
-        last_seen = latest + 1
-    else:
-        last_seen = latest - last_seen
-        if last_seen < 0:
-            last_seen = 0
-
-    results = db.execute(
-        """
+    query = """
         SELECT m.id, m.author, m.created, m.content
         FROM messages m
         JOIN user u ON m.author = u.username
         WHERE room = ?
-        ORDER BY m.created DESC
-        LIMIT ?
-    """,
-        (room, last_seen),
-    )
+        ORDER BY m.created ASC
+    """
 
+    data = []
+
+    results = db.execute(query, (room,))
     row_headers = [x[0] for x in results.description]
 
-    json_data = []
-
     rv = results.fetchall()
-
     close_db()
 
     for result in rv:
-        json_data.append(dict(zip(row_headers, result)))
+        data.append(dict(zip(row_headers, result)))
 
-    for i in json_data:
+    data.sort(key=lambda x: x["id"], reverse=True)
+
+    for i in data:
         i["created"] = to_est(i["created"])
 
-    return json_data
+    for i in range(0, len(data)):
+        data[i]["id"] = i
+
+    message_num = len(data) - (message_num + 1)
+
+    print("Returning " + str(message_num + 1) + " messages.")
+
+    return data[: message_num + 1]
