@@ -1,24 +1,24 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  <h1>{% block title %}Home{% endblock %}</h1>
+<h1>{% block title %}Home{% endblock %}</h1>
 {% endblock %}
 
 {% block content %}
-<br> 
+<br>
 Here are the rooms you are in:
 
 
 <div id="room-links">
-{% for i in room_list %}
-<p><a href="{{ url_for('jar.room', room_name=i) }}">{{ i }}</a></p>
-{% endfor %}
+  {% for i in room_list %}
+  <p><a href="{{ url_for('jar.room', room_name=i) }}">{{ i }}</a></p>
+  {% endfor %}
 </div>
 
 <br>
 To create a new room, fill in the form below:
 <form action="{{ url_for('jar.new_room') }}" method="post">
-    <input type="text" name="room_name" placeholder="Room Name" autocomplete="off" required>
-    <input type="submit" value="Add Room">
+  <input type="text" name="room_name" placeholder="Room Name" autocomplete="off" required>
+  <input type="submit" value="Add Room">
 </form>
 {% endblock %}
