@@ -49,29 +49,16 @@ def register():
     if f.request.method == "POST":
         username = f.request.form["username"]
         password = f.request.form["password"]
-        db = get_db()
-        error = None
 
         if not username:
             error = "Username is required."
         elif not password:
             error = "Password is required."
 
+        error = register_user(username, password)
+
         if error is None:
-            try:
-                db.execute(
-                    "INSERT INTO user (username, password) VALUES (?, ?)",
-                    (username, generate_password_hash(password)),
-                )
-                db.commit()
-            except db.IntegrityError:
-                # The username was already taken, which caused the
-                # commit to fail. Show a validation error.
-                error = f"User {username} is already registered."
-            else:
-                cb.add_to_room("lobby", username)
-                # Success, go to the login page.
-                return f.redirect(f.url_for("auth.login"))
+            return f.redirect(f.url_for("auth.login"))
 
         f.flash(error)
 
@@ -103,6 +90,39 @@ def logout():
     """Clear the current session, including the stored user id."""
     f.session.clear()
     return f.redirect(f.url_for("chat.index"))
+
+
+def register_user(username, password):
+    """Register a new user programmatically.
+
+    Validates that the username is not already taken. Hashes the
+    password for security.
+    """
+    db = get_db()
+    error = None
+
+    if not username:
+        error = "Username is required."
+    elif not password:
+        error = "Password is required."
+
+    if error is None:
+        try:
+            db.execute(
+                "INSERT INTO user (username, password) VALUES (?, ?)",
+                (username, generate_password_hash(password)),
+            )
+            db.commit()
+        except db.IntegrityError:
+            # The username was already taken, which caused the
+            # commit to fail. Show a validation error.
+            error = f"User {username} is already registered."
+        else:
+            cb.add_to_room("lobby", username)
+            # Success
+            return None
+
+    return error
 
 
 def check_user(user, password):

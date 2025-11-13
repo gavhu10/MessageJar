@@ -5,6 +5,16 @@ from zoneinfo import ZoneInfo
 
 status_user = "Message Jar"
 
+def create_room(room_name, creator):
+    """Create a new room with the given name and creator."""
+    add_to_room(room_name, creator, isadmin=1)
+    add_to_room(room_name, status_user)
+    notify(
+        f'Room {room_name} created by {creator}. Commands: Use "/delete yes" to delete the room.\
+              Use "/add user" to add a user. Use "/leave" to leave the room.',
+        room_name,
+    )
+
 
 def notify(content, room):
     """Send a notification message to a room."""
