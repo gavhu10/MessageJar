@@ -2,7 +2,7 @@ import functools
 import flask as f
 from werkzeug.security import check_password_hash, generate_password_hash
 
-import chatbackend as cb
+import backend as cb
 from db import get_db
 
 status_user = "Message Jar"
@@ -78,7 +78,7 @@ def login():
             # store the user id in a new session and return to the index
             f.session.clear()
             f.session["username"] = user["username"]
-            return f.redirect(f.url_for("chat.index"))
+            return f.redirect(f.url_for("jar.index"))
 
         f.flash(error)
 
@@ -89,7 +89,7 @@ def login():
 def logout():
     """Clear the current session, including the stored user id."""
     f.session.clear()
-    return f.redirect(f.url_for("chat.index"))
+    return f.redirect(f.url_for("jar.index"))
 
 
 def register_user(username, password):

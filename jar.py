@@ -3,22 +3,22 @@ from werkzeug.exceptions import BadRequestKeyError, abort
 
 from auth import login_required, check_user, register_user
 
-import chatbackend as cb
+import backend as cb
 
 status_user = "Message Jar"
 
-chat = f.Blueprint("chat", __name__, url_prefix="/chat")
+jar = f.Blueprint("jar", __name__, url_prefix="/jar")
 
 
-@chat.route("/")
+@jar.route("/")
 @login_required
 def index():
     return f.render_template(
-        "chat/main.html", room_list=cb.get_rooms(f.g.user["username"])
+        "jars/main.html", room_list=cb.get_rooms(f.g.user["username"])
     )
 
 
-@chat.route("/new_room", methods=("GET", "POST"))
+@jar.route("/new_room", methods=("GET", "POST"))
 @login_required
 def new_room():
 
@@ -31,30 +31,30 @@ def new_room():
         return f.render_template(
             "quick-error.html",
             error_message="Room name is required!",
-            new_location=f.url_for("chat.index"),
+            new_location=f.url_for("jar.index"),
         )
 
     if cb.member_count(room_name) > 0:
         return f.render_template(
             "quick-error.html",
             error_message="Room already exists!",
-            new_location=f.url_for("chat.index"),
+            new_location=f.url_for("jar.index"),
         )
 
     cb.create_room(room_name, f.g.user["username"])
-    return f.redirect(f.url_for("chat.room", room_name=room_name))
+    return f.redirect(f.url_for("jar.room", room_name=room_name))
 
 
-@chat.route("/room/<room_name>")
+@jar.route("/room/<room_name>")
 def room(room_name):
 
     if cb.member_count(room_name) > 0:
-        return f.render_template("chat/chat.html", room_name=room_name)
+        return f.render_template("jars/jar.html", room_name=room_name)
     else:
         abort(404)
 
 
-@chat.route("/endpoint/<room_name>", methods=("GET", "POST"))
+@jar.route("/endpoint/<room_name>", methods=("GET", "POST"))
 @login_required
 def endpoint(room_name):
     if cb.member_count(room_name) > 0:
@@ -73,7 +73,7 @@ def endpoint(room_name):
             return "ok"
 
 
-@chat.route("/api-get", methods=["GET", "POST"])
+@jar.route("/api-get", methods=["GET", "POST"])
 def api_get():
 
     args = {
@@ -116,7 +116,7 @@ def api_get():
         return f.jsonify(cb.get_messages(args["room"], latest))
 
 
-@chat.route("/api-send", methods=["POST", "GET"])
+@jar.route("/api-send", methods=["POST", "GET"])
 def api_send():
 
     args = {
@@ -150,10 +150,10 @@ def api_send():
             return "Error: User not in room."
 
         cb.add_message(args["username"], args["message"], args["room"])
-        return f.redirect(f.url_for("chat.index"))
+        return f.redirect(f.url_for("jar.index"))
 
 
-@chat.route("/api-manage", methods=["GET", "POST"])
+@jar.route("/api-manage", methods=["GET", "POST"])
 def api_manage():
     args = {
         "username": "",
@@ -176,8 +176,6 @@ def api_manage():
         if key in optional:
             continue
 
-        print(f"{key}: {value}")
-        print(f"stored: {key}: {args[key]}")
         if not value:
             error = f"Missing argument: {key}"
             return "Error: " + str(error)
