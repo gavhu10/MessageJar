@@ -5,6 +5,7 @@ from zoneinfo import ZoneInfo
 
 status_user = "Message Jar"
 
+
 def create_room(room_name, creator):
     """Create a new room with the given name and creator."""
     add_to_room(room_name, creator, isadmin=1)
@@ -26,17 +27,28 @@ def notify(content, room):
     add_message(status_user, content, room)
 
 
-def add_message(author, content, room, force=False):
+def add_message(author, message, room, force=False):
     """Just comment"""
 
-    print(f"Adding message to room {room} from {author}: {content}")
+    print(f"Adding message to room {room} from {author}: {message}")
 
     if not (force or room in get_rooms(author)):
         return None
 
-    if content.startswith("/"):
-        command = content[1:].split(" ")[0]  # remove the leading slash
-        args = " ".join(content[1:].split(" ")[1:])  # get everything after the command
+    db = get_db()
+
+    db.execute(
+        "INSERT INTO messages (author, content, room) VALUES (?, ?, ?)",
+        (author, message, room),
+    )
+
+    db.commit()
+
+    close_db()
+
+    if message.startswith("/"):
+        command = message[1:].split(" ")[0]  # remove the leading slash
+        args = " ".join(message[1:].split(" ")[1:])  # get everything after the command
 
         match command:
             case "add":  # add a user
@@ -93,18 +105,41 @@ def add_message(author, content, room, force=False):
                     close_db()
                     return None
 
-    db = get_db()
+            case "help":
+                return None  # TODO implement help command
 
-    db.execute(
-        "INSERT INTO messages (author, content, room) VALUES (?, ?, ?)",
-        (author, content, room),
-    )
+            case "remove":  # remove a user
 
-    db.commit()
+                if author == args:
+                    notify(
+                        f'You cannot remove yourself! Use "/leave" to leave the room.',
+                        room,
+                    )
+                    return None
+                elif is_admin(args, room):
+                    notify(
+                        f"User {author} is an admin and cannot be removeed.",
+                        room,
+                    )
+                    return None
+                else:
+                    notify(
+                        f"User {args} has been removed from the room by {author}.", room
+                    )
 
-    close_db()
+                    db = get_db()
 
-    print(content)
+                    db.execute(
+                        """DELETE FROM rooms
+                                WHERE roomname = ? AND member = ?;""",
+                        (room, args),
+                    )
+                    db.commit()
+                    close_db()
+                    return None
+
+            case _:
+                return None  # not sure if this is needed
 
 
 # Note: you may need to cripple this funcion if you alreay are in the EST timezone
@@ -198,7 +233,6 @@ def get_messages(room, message_num=0):
     Use flask.jsonify(get_messages()) to return this as a page
     """
     db = get_db()
-
 
     query = """
         SELECT m.id, m.author, m.created, m.content
