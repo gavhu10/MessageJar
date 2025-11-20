@@ -170,7 +170,6 @@ def api_manage():
         elif f.request.method == "GET":
             args[key] = f.request.args.get(key)
 
-    
     for key, value in args.items():
 
         if key in optional:
@@ -179,7 +178,7 @@ def api_manage():
         if not value:
             error = f"Missing argument: {key}"
             return "Error: " + str(error)
-        
+
         match args["action"]:
             case "new_user":
                 register_user(args["room"], args["username"])
