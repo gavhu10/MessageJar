@@ -63,25 +63,14 @@ def add_message(author, message, room, force=False):
 
             case "delete":  # delete room
 
-                if not is_admin(author, room) or args != "yes":
+                if delete_room(author, room):
+                    notify(f"Room {room} has been deleted by admin {author}.", room)
+                    return None
+                else:
                     notify(
                         f"User {author} is not an admin and cannot delete the room.",
                         room,
                     )
-                    return None
-                else:
-
-                    notify(f"Room {room} has been deleted by admin {author}.", room)
-                    db = get_db()
-
-                    db.execute(
-                        """DELETE FROM rooms
-                                WHERE roomname = ?;""",
-                        (room,),
-                    )
-                    db.commit()
-                    close_db()
-
                     return None
 
             case "leave":  # leave room
@@ -147,6 +136,27 @@ def to_est(time):
     """Convert a datetime.datetime object to GMT time string."""
     r = time.astimezone(ZoneInfo("America/New_York"))
     return str(r)[:-6]
+
+
+def delete_room(user, room):
+    """Delete a room from the database."""
+    if is_admin(user, room):
+
+        db = get_db()
+
+        db.execute(
+            """DELETE FROM rooms
+                    WHERE roomname = ?;""",
+            (room,),
+        )
+        db.commit()
+        close_db()
+
+        return True
+
+    else:
+
+        return False
 
 
 def member_count(room):
