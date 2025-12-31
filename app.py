@@ -38,12 +38,13 @@ def create_app(test_config=None):
 
     # apply the blueprints to the app
     import auth
-
     app.register_blueprint(auth.bp)
 
     import jar
-
     app.register_blueprint(jar.jar)
+
+    import api
+    app.register_blueprint(api.api)
 
     return app
 
