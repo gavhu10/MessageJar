@@ -116,7 +116,7 @@ def api_manage():
             return "Error: " + str(error)
 
     error, _ = check_user(args["username"], args["password"])
-    if error is not None or args["action"] == "new_user":
+    if (error is not None) and (args["action"] != "new_user"):
         return "Error: " + str(error)
 
     match args["action"]:
