@@ -97,7 +97,7 @@ def register_user(username, password):
     Validates that the username is not already taken. Hashes the
     password for security.
     """
-    
+
     error = None
 
     if not username:
@@ -132,11 +132,8 @@ def check_user(user, password):
     with DBConnection() as db:
         r = db.execute("SELECT * FROM user WHERE username = ?", (user,)).fetchone()
 
-    if r is None:
-        error = "Incorrect username."
-        r = ""
-    elif not check_password_hash(r["password"], password):
-        error = "Incorrect password."  # TODO security risk
+    if r is None or not check_password_hash(r["password"], password):
+        error = "Incorrect username or password."
         r = ""
     if user == status_user:
         error = "Nice try."
