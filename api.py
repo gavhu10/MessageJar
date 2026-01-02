@@ -37,8 +37,6 @@ def api_get():
         if key in optional:
             continue
 
-        print(f"{key}: {value}")
-        print(f"stored: {key}: {args[key]}")
         if not value:
             error = f"Missing argument: {key}"
             return "Error: " + str(error)
@@ -69,7 +67,6 @@ def api_send():
             args[key] = f.request.args.get(key)
 
     for key, value in args.items():
-        print(f"{key}: {value}")
         if not value:
             error = f"Missing argument: {key}"
             return "Error: " + str(error)
@@ -121,7 +118,7 @@ def api_manage():
 
     match args["action"]:
         case "new_user":
-            if register_user(args["room"], args["username"]) is not None:
+            if register_user(args["username"], args["password"]) is not None:
                 return "Error: User registration failed."
             return "User registered."
         case "new_room":
