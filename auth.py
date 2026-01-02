@@ -3,7 +3,7 @@ import flask as f
 from werkzeug.security import check_password_hash, generate_password_hash
 
 import backend as cb
-from db import get_db
+from db import DBConnection
 
 status_user = "Message Jar"
 
@@ -32,11 +32,10 @@ def load_logged_in_user():
     if not username:
         f.g.user = None
     else:
-        f.g.user = (
-            get_db()
-            .execute("SELECT * FROM user WHERE username = ?", (username,))
-            .fetchone()
-        )
+        with DBConnection() as db:
+            f.g.user = db.execute(
+                "SELECT * FROM user WHERE username = ?", (username,)
+            ).fetchone()
 
 
 @bp.route("/register", methods=("GET", "POST"))
@@ -98,7 +97,7 @@ def register_user(username, password):
     Validates that the username is not already taken. Hashes the
     password for security.
     """
-    db = get_db()
+    
     error = None
 
     if not username:
@@ -107,29 +106,31 @@ def register_user(username, password):
         error = "Password is required."
 
     if error is None:
-        try:
-            db.execute(
-                "INSERT INTO user (username, password) VALUES (?, ?)",
-                (username, generate_password_hash(password)),
-            )
-            db.commit()
-        except db.IntegrityError:
-            # The username was already taken, which caused the
-            # commit to fail. Show a validation error.
-            error = f"User {username} is already registered."
-        else:
-            cb.add_to_room("lobby", username)
-            # Success
-            return None
+        with DBConnection() as db:
+            try:
+                db.execute(
+                    "INSERT INTO user (username, password) VALUES (?, ?)",
+                    (username, generate_password_hash(password)),
+                )
+                db.commit()
+            except db.IntegrityError:
+                # The username was already taken, which caused the
+                # commit to fail. Show a validation error.
+                error = f"User {username} is already registered."
+            else:
+                cb.add_to_room("lobby", username)
+                # Success
+                return None
 
     return error
 
 
 def check_user(user, password):
-    db = get_db()
+    """Check a user's credentials programmatically."""
     error = None
 
-    r = db.execute("SELECT * FROM user WHERE username = ?", (user,)).fetchone()
+    with DBConnection() as db:
+        r = db.execute("SELECT * FROM user WHERE username = ?", (user,)).fetchone()
 
     if r is None:
         error = "Incorrect username."
