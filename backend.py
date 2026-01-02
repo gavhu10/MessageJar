@@ -1,6 +1,5 @@
 from db import get_db, close_db
 
-from datetime import datetime
 from zoneinfo import ZoneInfo
 
 status_user = "Message Jar"
@@ -263,16 +262,9 @@ def get_messages(room, message_num=0):
     for result in rv:
         data.append(dict(zip(row_headers, result)))
 
-    data.sort(key=lambda x: x["id"], reverse=True)
+    data.sort(key=lambda x: x["id"])
 
     for i in data:
         i["created"] = to_est(i["created"])
 
-    for i in range(0, len(data)):
-        data[i]["id"] = i
-
-    message_num = len(data) - (message_num + 1)
-
-    print("Returning " + str(message_num + 1) + " messages.")
-
-    return data[: message_num + 1]
+    return data[message_num:]

@@ -1,13 +1,15 @@
 (function () {
     window.lastSeenId = 0;
 
-    function renderMessages(messages) { // still need to fix some timezone things
+    function renderMessages(messages) {
         const container = document.getElementById('container');
+        if (!container) return;
 
-
-        for (let i = messages.length - 1; i >= 0; --i) {
-            console.log("in renderMessages loop i=", i);
+        for (let i = 0; i < messages.length; ++i) {
             const m = messages[i];
+            // backend returns id as sequential index starting at 0
+            if (typeof m.id === 'number' && m.id <= window.lastSeenId) continue;
+
             const author = m.author || "Error getting author";
             const content = m.content || "Error getting message";
 
@@ -25,15 +27,20 @@
         scrollToBottom();
     }
 
-
     function updateLastSeenFrom(allMessages) {
         if (!Array.isArray(allMessages) || allMessages.length === 0) return;
-        const last = allMessages[allMessages.length - 1]; // get the id of the last message
-        window.lastSeenId = window.lastSeenId + Number(last.id) + 1 || window.lastSeenId;
+        // backend returns messages with id reassigned to 0..N-1, so use the max id
+        // const maxId = allMessages.reduce(function (acc, cur) {
+        //     if (typeof cur.id === 'number' && cur.id > acc) return cur.id;
+        //     return acc;
+        // }, window.lastSeenId);
+        // window.lastSeenId = Math.max(window.lastSeenId, maxId);
+        window.lastSeenId += allMessages.length;
     }
 
     function getMessages() {
-        return fetch('/jar/endpoint/' + window.room_name + '?latest=' + window.lastSeenId, {
+        const room = window.room_name || '';
+        return fetch('/jar/endpoint/' + encodeURIComponent(room) + '?latest=' + window.lastSeenId, {
             method: 'GET',
             credentials: 'include',
             headers: { 'Accept': 'application/json' }
@@ -43,28 +50,20 @@
         }).then(function (data) {
             const all = (data && data.messages) ? data.messages : Array.isArray(data) ? data : [];
 
-            // If no messages return early
             if (!all.length) return;
-
-            // We are here so we have messages
 
             notifyPing();
 
+            // On first load, render everything
             if (window.lastSeenId === 0) {
-
-
-                const initial = all; // just render all messages, but this may change
-
-                renderMessages(initial);
-                // set lastSeenId to highest id now
+                renderMessages(all);
                 updateLastSeenFrom(all);
                 return;
             }
 
-            if (all.length > 0) {
-                renderMessages(all);
-                updateLastSeenFrom(all);
-            }
+            // Render only new messages (renderMessages will skip already-seen using id)
+            renderMessages(all);
+            updateLastSeenFrom(all);
         }).catch(function (err) {
             console.error('Failed to fetch messages:', err);
         });
@@ -72,14 +71,15 @@
 
     function sendMessage() {
         const input = document.getElementById('message');
-        const messageText = input.value;
+        if (!input) return;
+        const messageText = input.value.trim();
         if (!messageText) return;
 
         const formData = new URLSearchParams();
         formData.append('message', messageText);
         input.value = '';
 
-        fetch('/jar/endpoint/' + window.room_name, {
+        fetch('/jar/endpoint/' + encodeURIComponent(window.room_name || ''), {
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -88,9 +88,7 @@
             if (!res.ok) throw new Error('Network response was not ok');
             return res.json().catch(function () { return null; });
         }).then(function () {
-            // // immediately poll for new messages after sending
-            // getMessages();
-            // window.lastSeenId++; // this code causes duplicate messages, so commenting out for now
+            // rely on polling to fetch the new message
         }).catch(function (err) {
             console.error('Failed to send message:', err);
         });
@@ -98,49 +96,53 @@
 
     function scrollToBottom() {
         var objDiv = document.getElementById("container");
+        if (!objDiv) return;
         objDiv.scrollTop = objDiv.scrollHeight;
-        console.log("scrolled to bottom");
     }
-
 
     function notifyPing() {
         if (!_ctx) enable();
+        if (!_ctx) return;
         const t = _ctx.currentTime;
         const o = _ctx.createOscillator();
         const g = _ctx.createGain();
         o.type = 'sine';
         o.frequency.setValueAtTime(900, t);
         g.gain.setValueAtTime(0.0001, t);
-        g.gain.exponentialRampToValueAtTime(0.9, t + 0.01);   // louder peak (0..1)
-        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);  // decay
+        g.gain.exponentialRampToValueAtTime(0.9, t + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);
         o.connect(g);
-        g.connect(_master); // route through master gain
+        g.connect(_master);
         o.start(t);
         o.stop(t + 0.42);
-        o.onended = () => { o.disconnect(); g.disconnect(); };
+        o.onended = () => { try { o.disconnect(); g.disconnect(); } catch (e) { } };
     }
-
 
     let _ctx, _master;
     function enable() {
         _ctx = _ctx || new (window.AudioContext || window.webkitAudioContext)();
-        if (!_ctx.state === 'suspended') _ctx.resume().catch(() => { });
-        if (!_master) {
+        if (_ctx && _ctx.state === 'suspended') {
+            _ctx.resume().catch(() => { });
+        }
+        if (!_master && _ctx) {
             _master = _ctx.createGain();
-            _master.gain.value = 0.6; // overall volume 0..1 (set lower to avoid clipping)
+            _master.gain.value = 0.6;
             _master.connect(_ctx.destination);
         }
     }
 
-
-    document.getElementById('toTheBottom').addEventListener('click', scrollToBottom);
+    const btnBottom = document.getElementById('toTheBottom');
+    if (btnBottom) btnBottom.addEventListener('click', scrollToBottom);
 
     // initial load and periodic sync
     getMessages();
     setInterval(getMessages, 1000);
 
-    document.getElementById('sendMessageButton').addEventListener('click', sendMessage);
-    document.getElementById('message').addEventListener('keydown', function (e) {
+    const sendBtn = document.getElementById('sendMessageButton');
+    if (sendBtn) sendBtn.addEventListener('click', sendMessage);
+
+    const msgInput = document.getElementById('message');
+    if (msgInput) msgInput.addEventListener('keydown', function (e) {
         if (e.key === 'Enter') {
             e.preventDefault();
             sendMessage();

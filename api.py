@@ -1,5 +1,4 @@
-
-import flask as f 
+import flask as f
 
 from auth import check_user, register_user
 
@@ -8,6 +7,7 @@ import backend as cb
 status_user = "Message Jar"
 
 api = f.Blueprint("api", __name__, url_prefix="/api")
+
 
 @api.route("/api-get", methods=["GET", "POST"])
 def api_get():
