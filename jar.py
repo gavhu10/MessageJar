@@ -1,7 +1,7 @@
 import flask as f
 from werkzeug.exceptions import BadRequestKeyError, abort
 
-from auth import login_required, check_user, register_user
+from auth import login_required
 
 import backend as cb
 
@@ -71,4 +71,3 @@ def endpoint(room_name):
             content = f.request.form["message"]
             cb.add_message(str(f.g.user["username"]), content, room_name)
             return "ok"
-

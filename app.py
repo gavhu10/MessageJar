@@ -1,5 +1,9 @@
 import os
 
+import db
+import auth
+import jar
+import api
 
 import flask as f
 
@@ -31,19 +35,10 @@ def create_app(test_config=None):
     def main():
         return f.render_template("main.html")
 
-    # register the database commands
-    import db
-
     db.init_app(app)
 
-    # apply the blueprints to the app
-    import auth
     app.register_blueprint(auth.bp)
-
-    import jar
     app.register_blueprint(jar.jar)
-
-    import api
     app.register_blueprint(api.api)
 
     return app
