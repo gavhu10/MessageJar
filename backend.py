@@ -1,4 +1,4 @@
-from db import get_db, close_db
+from db import DBConnection
 
 from zoneinfo import ZoneInfo
 
@@ -34,16 +34,14 @@ def add_message(author, message, room, force=False):
     if not (force or room in get_rooms(author)):
         return None
 
-    db = get_db()
+    with DBConnection() as db:
 
-    db.execute(
-        "INSERT INTO messages (author, content, room) VALUES (?, ?, ?)",
-        (author, message, room),
-    )
+        db.execute(
+            "INSERT INTO messages (author, content, room) VALUES (?, ?, ?)",
+            (author, message, room),
+        )
 
-    db.commit()
-
-    close_db()
+        db.commit()
 
     if message.startswith("/"):
         command = message[1:].split(" ")[0]  # remove the leading slash
@@ -82,15 +80,15 @@ def add_message(author, message, room, force=False):
                 else:
                     notify(f"User {author} has left the room.", room)
 
-                    db = get_db()
+                    with DBConnection() as db:
 
-                    db.execute(
-                        """DELETE FROM rooms
-                                WHERE roomname = ? AND member = ?;""",
-                        (room, author),
-                    )
-                    db.commit()
-                    close_db()
+                        db.execute(
+                            """DELETE FROM rooms
+                                    WHERE roomname = ? AND member = ?;""",
+                            (room, author),
+                        )
+                        db.commit()
+
                     return None
 
             case "help":
@@ -115,15 +113,15 @@ def add_message(author, message, room, force=False):
                         f"User {args} has been removed from the room by {author}.", room
                     )
 
-                    db = get_db()
+                    with DBConnection() as db:
 
-                    db.execute(
-                        """DELETE FROM rooms
-                                WHERE roomname = ? AND member = ?;""",
-                        (room, args),
-                    )
-                    db.commit()
-                    close_db()
+                        db.execute(
+                            """DELETE FROM rooms
+                                    WHERE roomname = ? AND member = ?;""",
+                            (room, args),
+                        )
+                        db.commit()
+
                     return None
 
             case _:
@@ -141,15 +139,15 @@ def delete_room(user, room):
     """Delete a room from the database."""
     if is_admin(user, room):
 
-        db = get_db()
+        with DBConnection() as db:
 
-        db.execute(
-            """DELETE FROM rooms
-                    WHERE roomname = ?;""",
-            (room,),
-        )
-        db.commit()
-        close_db()
+            db.execute(
+                """DELETE FROM messages
+                        WHERE room = ?;""",
+                (room,),
+            )
+
+            db.commit()
 
         return True
 
@@ -161,13 +159,13 @@ def delete_room(user, room):
 def member_count(room):
     """duh"""
 
-    db = get_db()
-    r = db.execute(
-        """SELECT COUNT(*) AS member_count
-                FROM rooms
-                WHERE roomname = ?;""",
-        (room,),
-    ).fetchone()
+    with DBConnection() as db:
+        r = db.execute(
+            """SELECT COUNT(*) AS member_count
+                    FROM rooms
+                    WHERE roomname = ?;""",
+            (room,),
+        ).fetchone()
 
     return r[0]
 
@@ -177,24 +175,20 @@ def add_to_room(room_name, user, isadmin=0):
     The way that the database is set up means that to add someone to a non-existent room
     means that the room will be created.
     """
-    db = get_db()
+    with DBConnection() as db:
 
-    db.execute(
-        "INSERT INTO rooms (roomname, member, isadmin) VALUES (?, ?, ?)",
-        (room_name, user, isadmin),
-    )
-    db.commit()
-    close_db()
+        db.execute(
+            "INSERT INTO rooms (roomname, member, isadmin) VALUES (?, ?, ?)",
+            (room_name, user, isadmin),
+        )
+        db.commit()
 
 
 def user_exists(user):
     """Check if a user exists in the database."""
-    db = get_db()
+    with DBConnection() as db:
 
-    r = db.execute("SELECT * FROM user WHERE username = ?", (user,)).fetchone()
-
-    close_db()
-
+        r = db.execute("SELECT * FROM user WHERE username = ?", (user,)).fetchone()
     if r is None:
         return False
     else:
@@ -202,15 +196,16 @@ def user_exists(user):
 
 
 def get_rooms(user):
-    db = get_db()
+    """Get a list of rooms that a user is a member of."""
 
-    rooms = db.execute(
-        """
-    SELECT DISTINCT roomname
-    FROM rooms
-    WHERE member = ?;""",
-        (user,),
-    ).fetchall()
+    with DBConnection() as db:
+        rooms = db.execute(
+            """
+        SELECT DISTINCT roomname
+        FROM rooms
+        WHERE member = ?;""",
+            (user,),
+        ).fetchall()
 
     rooms = [r["roomname"] for r in rooms]
 
@@ -219,17 +214,15 @@ def get_rooms(user):
 
 def is_admin(user, room):
     """Check if a user is an admin of a room."""
-    db = get_db()
 
-    r = db.execute(
-        """
-    SELECT isadmin
-    FROM rooms
-    WHERE roomname = ? AND member = ?;""",
-        (room, user),
-    ).fetchone()
-
-    close_db()
+    with DBConnection() as db:
+        r = db.execute(
+            """
+        SELECT isadmin
+        FROM rooms
+        WHERE roomname = ? AND member = ?;""",
+            (room, user),
+        ).fetchone()
 
     if r and r["isadmin"] == 1:
         return True
@@ -241,7 +234,6 @@ def get_messages(room, message_num=0):
     """Get all the messages from a room and return them as a list.
     Use flask.jsonify(get_messages()) to return this as a page
     """
-    db = get_db()
 
     query = """
         SELECT m.id, m.author, m.created, m.content
@@ -253,11 +245,12 @@ def get_messages(room, message_num=0):
 
     data = []
 
-    results = db.execute(query, (room,))
-    row_headers = [x[0] for x in results.description]
+    with DBConnection() as db:
 
-    rv = results.fetchall()
-    close_db()
+        results = db.execute(query, (room,))
+        row_headers = [x[0] for x in results.description]
+
+        rv = results.fetchall()
 
     for result in rv:
         data.append(dict(zip(row_headers, result)))
