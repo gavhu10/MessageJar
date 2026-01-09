@@ -34,18 +34,19 @@ def new_room():
             new_location=f.url_for("jar.index"),
         )
 
-    if cb.member_count(room_name) > 0:
-        return f.render_template(
-            "quick-error.html",
-            error_message="Room already exists!",
-            new_location=f.url_for("jar.index"),
-        )
-
-    cb.create_room(room_name, f.g.user["username"])
+    try:
+        cb.create_room(room_name, f.g.user["username"])
+    except cb.NotAllowedError as e:
+        if cb.member_count(room_name) > 0:
+            return f.render_template(
+                "quick-error.html",
+                error_message=e.message,
+                new_location=f.url_for("jar.index"),
+            )
     return f.redirect(f.url_for("jar.room", room_name=room_name))
 
 
-@jar.route("/room/<room_name>")
+@jar.route("/<room_name>")
 def room(room_name):
 
     if cb.member_count(room_name) > 0:

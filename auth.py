@@ -4,10 +4,19 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 import backend as cb
 from db import DBConnection
+from backend import AuthError
 
 status_user = "Message Jar"
 
 bp = f.Blueprint("auth", __name__, url_prefix="/auth")
+
+
+class RegistrationError(Exception):
+    """Custom exception for registration errors."""
+
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
 
 
 def login_required(view):
@@ -48,18 +57,23 @@ def register():
     if f.request.method == "POST":
         username = f.request.form["username"]
         password = f.request.form["password"]
+        error = None
 
         if not username:
             error = "Username is required."
         elif not password:
             error = "Password is required."
 
-        error = register_user(username, password)
+        if error is None:
+            try:
+                register_user(username, password)
+            except RegistrationError as e:
+                error = e.message
 
         if error is None:
             return f.redirect(f.url_for("auth.login"))
-
-        f.flash(error)
+        else:
+            f.flash(error)
 
     return f.render_template("auth/register.html")
 
@@ -71,15 +85,16 @@ def login():
         username = f.request.form["username"]
         password = f.request.form["password"]
 
-        error, user = check_user(username, password)
-
-        if error is None:
+        try:
+            user = check_user(username, password)
+            print(f"User {username} logged in.")
+        except AuthError as e:
+            f.flash(e.message)
+        else:
             # store the user id in a new session and return to the index
             f.session.clear()
             f.session["username"] = user["username"]
             return f.redirect(f.url_for("jar.index"))
-
-        f.flash(error)
 
     return f.render_template("auth/login.html")
 
@@ -98,45 +113,36 @@ def register_user(username, password):
     password for security.
     """
 
-    error = None
-
     if not username:
-        error = "Username is required."
+        raise RegistrationError("Username is required.")
     elif not password:
-        error = "Password is required."
+        raise RegistrationError("Password is required.")
 
-    if error is None:
-        with DBConnection() as db:
-            try:
-                db.execute(
-                    "INSERT INTO user (username, password) VALUES (?, ?)",
-                    (username, generate_password_hash(password)),
-                )
-                db.commit()
-            except db.IntegrityError:
-                # The username was already taken, which caused the
-                # commit to fail. Show a validation error.
-                error = f"User {username} is already registered."
-            else:
-                cb.add_to_room("lobby", username)
-                # Success
-                return None
-
-    return error
+    with DBConnection() as db:
+        try:
+            db.execute(
+                "INSERT INTO user (username, password) VALUES (?, ?)",
+                (username, generate_password_hash(password)),
+            )
+            db.commit()
+        except db.IntegrityError:
+            # The username was already taken, which caused the
+            # commit to fail. Show a validation error.
+            raise RegistrationError(f"User {username} is already registered.")
+        else:
+            cb.add_to_room("lobby", username)
+            # Success
 
 
 def check_user(user, password):
     """Check a user's credentials programmatically."""
-    error = None
 
     with DBConnection() as db:
         r = db.execute("SELECT * FROM user WHERE username = ?", (user,)).fetchone()
 
     if r is None or not check_password_hash(r["password"], password):
-        error = "Incorrect username or password."
-        r = ""
+        raise AuthError("Incorrect username or password.")
     if user == status_user:
-        error = "Nice try."
-        r = ""
+        raise AuthError("Cannot log in as status user.")
 
-    return (error, r)
+    return r
