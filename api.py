@@ -3,6 +3,8 @@ import flask as f
 from auth import check_user, register_user
 
 import backend as cb
+from backend import NotAllowedError, AuthError
+from auth import RegistrationError
 
 status_user = "Message Jar"
 
@@ -39,12 +41,12 @@ def api_get():
 
         if not value:
             error = f"Missing argument: {key}"
-            return "Error: " + str(error)
+            f.abort(400)
 
-    error, _ = check_user(args["username"], args["password"])
-
-    if error is not None:
-        return "Error: " + str(error)
+    try:
+        check_user(args["username"], args["password"])
+    except AuthError:
+        f.abort(403)
     else:
 
         return f.jsonify(cb.get_messages(args["room"], latest))
@@ -69,21 +71,19 @@ def api_send():
     for key, value in args.items():
         if not value:
             error = f"Missing argument: {key}"
-            return "Error: " + str(error)
+            f.abort(400)
 
-    error, _ = check_user(args["username"], args["password"])
+    try:
+        check_user(args["username"], args["password"])
+    except AuthError:
+        f.abort(403)
 
     rooms = cb.get_rooms(args["username"])
+    if not args["room"] in rooms:
+        f.abort(403)
 
-    if error is not None:
-        return "Error: " + str(error)
-    else:
-
-        if args["username"] not in rooms:
-            return "Error: User not in room."
-
-        cb.add_message(args["username"], args["message"], args["room"])
-        return f.redirect(f.url_for("jar.index"))
+    cb.add_message(args["username"], args["message"], args["room"])
+    return "Message sent."
 
 
 @api.route("/api-manage", methods=["GET", "POST"])
@@ -110,32 +110,49 @@ def api_manage():
 
         if not value:
             error = f"Missing argument: {key}"
-            return "Error: " + str(error)
+            f.abort(400)
 
-    error, _ = check_user(args["username"], args["password"])
-    if (error is not None) and (args["action"] != "new_user"):
-        return "Error: " + str(error)
+    if args["action"] != "new_user":
+        try:
+            check_user(args["username"], args["password"])
+        except AuthError:
+            f.abort(403)
 
     match args["action"]:
         case "new_user":
-            if register_user(args["username"], args["password"]) is not None:
-                return "Error: User registration failed."
+            try:
+                register_user(args["username"], args["password"])
+            except RegistrationError:
+                f.abort(403)
             return "User registered."
         case "new_room":
-            cb.create_room(args["room"], args["username"])
+            try:
+                cb.create_room(args["room"], args["username"])
+            except NotAllowedError:
+                f.abort(403)
+            return "Room created."
         case "delete_room":
-            cb.delete_room(args["room"], args["username"])
+            try:
+                cb.delete_room(args["room"], args["username"])
+            except NotAllowedError:
+                f.abort(403)
+
+            return "Room deleted."
         case "list_rooms":
             rooms = cb.get_rooms(args["username"])
             return f.jsonify(rooms)
         case "verify_user":
-            error, _ = check_user(args["username"], args["password"])
-            if error is not None:
-                return "Error: " + str(error)
-            else:
-                return "User verified."
+            try:
+                check_user(args["username"], args["password"])
+            except AuthError:
+                f.abort(403)
+
+            return "User verified."
         case "create_room":
-            cb.create_room(args["room"], args["username"])
+            try:
+                cb.create_room(args["room"], args["username"])
+            except NotAllowedError:
+                f.abort(403)
             return "Room created."
         case _:
             return "Error: Invalid action."

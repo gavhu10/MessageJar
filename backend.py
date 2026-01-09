@@ -5,8 +5,26 @@ from zoneinfo import ZoneInfo
 status_user = "Message Jar"
 
 
+class AuthError(Exception):
+    """Custom exception for authentication errors."""
+
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
+
+
+class NotAllowedError(Exception):
+    """Custom exception for not allowed actions."""
+
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
+
+
 def create_room(room_name, creator):
     """Create a new room with the given name and creator."""
+    if member_count(room_name) > 0:
+        raise NotAllowedError(f"Room {room_name} already exists.")
     add_to_room(room_name, creator, isadmin=1)
     add_to_room(room_name, status_user)
     notify(
@@ -27,12 +45,12 @@ def notify(content, room):
 
 
 def add_message(author, message, room, force=False):
-    """Just comment"""
+    """Add a message to the database."""
 
     print(f"Adding message to room {room} from {author}: {message}")
 
     if not (force or room in get_rooms(author)):
-        return None
+        raise AuthError(f"User {author} is not a member of room {room}.")
 
     with DBConnection() as db:
 
@@ -59,11 +77,12 @@ def add_message(author, message, room, force=False):
                     return None
 
             case "delete":  # delete room
+                try:
 
-                if delete_room(author, room):
+                    delete_room(author, room)
                     notify(f"Room {room} has been deleted by admin {author}.", room)
                     return None
-                else:
+                except NotAllowedError:
                     notify(
                         f"User {author} is not an admin and cannot delete the room.",
                         room,
@@ -149,11 +168,9 @@ def delete_room(user, room):
 
             db.commit()
 
-        return True
-
     else:
 
-        return False
+        raise NotAllowedError(f"User {user} is not an admin of room {room}.")
 
 
 def member_count(room):
