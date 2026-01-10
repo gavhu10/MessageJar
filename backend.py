@@ -78,9 +78,7 @@ def add_message(author, message, room, force=False):
 
             case "delete":  # delete room
                 try:
-
                     delete_room(author, room)
-                    notify(f"Room {room} has been deleted by admin {author}.", room)
                     return None
                 except NotAllowedError:
                     notify(
@@ -155,22 +153,22 @@ def to_est(time):
 
 
 def delete_room(user, room):
-    """Delete a room from the database."""
-    if is_admin(user, room):
-
-        with DBConnection() as db:
-
-            db.execute(
-                """DELETE FROM messages
-                        WHERE room = ?;""",
-                (room,),
-            )
-
-            db.commit()
-
-    else:
-
+    """Delete a room and its messages from the database."""
+    if not is_admin(user, room):
         raise NotAllowedError(f"User {user} is not an admin of room {room}.")
+
+    with DBConnection() as db:
+        # delete messages for the room
+        db.execute(
+            "DELETE FROM messages WHERE room = ?;",
+            (room,),
+        )
+        # delete room membership entries
+        db.execute(
+            "DELETE FROM rooms WHERE roomname = ?;",
+            (room,),
+        )
+        db.commit()
 
 
 def member_count(room):
