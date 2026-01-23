@@ -4,8 +4,18 @@ import db
 import auth
 import jar
 import api
+import click
 
 import flask as f
+
+
+@click.command("init")
+def init_db_command():
+    """Clear existing data and create new tables."""
+    db.init_db()
+    click.echo("Initialized the database.")
+    auth.init_auth()
+    click.echo("Initialized the authentication system.")
 
 
 def create_app(test_config=None):
@@ -36,6 +46,8 @@ def create_app(test_config=None):
         return f.render_template("main.html")
 
     db.init_app(app)
+
+    app.cli.add_command(init_db_command)
 
     app.register_blueprint(auth.bp)
     app.register_blueprint(jar.jar)

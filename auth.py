@@ -1,6 +1,7 @@
 import functools
 import flask as f
 from werkzeug.security import check_password_hash, generate_password_hash
+import secrets
 
 import backend as cb
 from db import DBConnection
@@ -17,6 +18,11 @@ class RegistrationError(Exception):
     def __init__(self, message):
         self.message = message
         super().__init__(self.message)
+
+
+def init_auth():
+    with f.current_app.open_instance_resource("config.py", "w") as file:
+        file.write(f"SECRET_KEY = {secrets.token_hex()}")
 
 
 def login_required(view):
