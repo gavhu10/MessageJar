@@ -1,7 +1,6 @@
 import sqlite3
 from datetime import datetime
 
-import click
 import flask as f
 
 
@@ -58,13 +57,6 @@ def init_db():
             db.executescript(file.read().decode("utf8"))
 
 
-@click.command("init-db")
-def init_db_command():
-    """Clear existing data and create new tables."""
-    init_db()
-    click.echo("Initialized the database.")
-
-
 sqlite3.register_converter(
     "timestamp", lambda v: datetime.fromisoformat(v.decode())
 )  # TODO set time zone
@@ -75,4 +67,3 @@ def init_app(app):
     the application factory.
     """
     app.teardown_appcontext(__close_db)
-    app.cli.add_command(init_db_command)
