@@ -22,7 +22,7 @@ class RegistrationError(Exception):
 
 def init_auth():
     with f.current_app.open_instance_resource("config.py", "w") as file:
-        file.write(f"SECRET_KEY = {secrets.token_hex()}")
+        file.write(f"SECRET_KEY = \"{secrets.token_hex()}\"")
 
 
 def login_required(view):
