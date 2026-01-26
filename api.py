@@ -131,13 +131,6 @@ def api_manage():
             except NotAllowedError:
                 f.abort(403)
             return "Room created."
-        case "delete_room":
-            try:
-                cb.delete_room(args["room"], args["username"])
-            except NotAllowedError:
-                f.abort(403)
-
-            return "Room deleted."
         case "list_rooms":
             rooms = cb.get_rooms(args["username"])
             return f.jsonify(rooms)
