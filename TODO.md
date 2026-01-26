@@ -5,4 +5,4 @@ Things to be done before 1.0 release:
  - [ ] List features on README
  - [x] Provide install instructions
  - [x] Add licence
- - [ ] Make the lobby chat clear every 24 hrs
+ - [x] Make the lobby chat clear every 24 hrs
