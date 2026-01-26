@@ -1,6 +1,7 @@
 from db import DBConnection
 
 from zoneinfo import ZoneInfo
+from datetime import datetime
 
 status_user = "Message Jar"
 
@@ -185,6 +186,16 @@ def member_count(room):
     return r[0]
 
 
+def clear_room(room):
+    """Clear all messages from a room."""
+    with DBConnection() as db:
+        db.execute(
+            "DELETE FROM messages WHERE room = ?;",
+            (room,),
+        )
+        db.commit()
+
+
 def add_to_room(room_name, user, isadmin=0):
     """Add a user to a room.
     The way that the database is set up means that to add someone to a non-existent room
@@ -274,5 +285,17 @@ def get_messages(room, message_num=0):
 
     for i in data:
         i["created"] = to_est(i["created"])
+
+    if room == "lobby" and len(data) > 0:
+        time = datetime.strptime(data[0]["created"], "%Y-%m-%d %H:%M:%S").replace(
+            tzinfo=ZoneInfo("America/New_York")
+        )
+        now = datetime.now(ZoneInfo("UTC"))
+        now = datetime.now(ZoneInfo("America/New_York"))
+        print(f"Lobby created at {time}. Now is {now}. Difference is {now - time}")
+        difference = now - time
+        if difference.total_seconds() > 86400:  # 24 hours in seconds
+            clear_room("lobby")
+            return []
 
     return data[message_num:]
