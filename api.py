@@ -83,7 +83,7 @@ def api_send():
         f.abort(403)
 
     cb.add_message(args["username"], args["message"], args["room"])
-    return "Message sent."
+    return "OK"
 
 
 @api.route("/api-manage", methods=["GET", "POST"])
@@ -124,13 +124,13 @@ def api_manage():
                 register_user(args["username"], args["password"])
             except RegistrationError:
                 f.abort(403)
-            return "User registered."
+            return "OK"
         case "new_room":
             try:
                 cb.create_room(args["room"], args["username"])
             except NotAllowedError:
                 f.abort(403)
-            return "Room created."
+            return "OK"
         case "list_rooms":
             rooms = cb.get_rooms(args["username"])
             return f.jsonify(rooms)
@@ -140,12 +140,12 @@ def api_manage():
             except AuthError:
                 f.abort(403)
 
-            return "User verified."
+            return "OK"
         case "create_room":
             try:
                 cb.create_room(args["room"], args["username"])
             except NotAllowedError:
                 f.abort(403)
-            return "Room created."
+            return "OK"
         case _:
-            return "Error: Invalid action."
+            f.abort(400)
