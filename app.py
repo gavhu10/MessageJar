@@ -1,10 +1,12 @@
 import os
+import logging
+import click
 
 import db
 import auth
 import jar
 import api
-import click
+import user
 
 import flask as f
 
@@ -20,6 +22,8 @@ def init_db_command():
 
 def create_app(test_config=None):
     """Create and configure an instance of the Flask application."""
+
+    logging.getLogger().setLevel(logging.INFO)
     app = f.Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         # a default secret that should be overridden by instance config
@@ -52,6 +56,7 @@ def create_app(test_config=None):
     app.register_blueprint(auth.bp)
     app.register_blueprint(jar.jar)
     app.register_blueprint(api.api)
+    app.register_blueprint(user.user)
 
     return app
 

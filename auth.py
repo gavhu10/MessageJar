@@ -155,3 +155,16 @@ def check_user(user, password):
 
     f.current_app.logger.info(f"User {user} logged in successfully.")
     return r
+
+
+def change_password(username, old_password, new_password):
+    """Change a user's password."""
+
+    check_user(username, old_password)
+
+    with DBConnection() as db:
+        db.execute(
+            "UPDATE user SET password = ? WHERE username = ?",
+            (generate_password_hash(new_password), username),
+        )
+        db.commit()
