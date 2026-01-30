@@ -21,6 +21,7 @@ class RegistrationError(Exception):
 
 
 def init_auth():
+    f.current_app.logger.info("Initializing authentication system.")
     with f.current_app.open_instance_resource("config.py", "w") as file:
         file.write(f'SECRET_KEY = "{secrets.token_hex()}"')
 
@@ -93,7 +94,6 @@ def login():
 
         try:
             user = check_user(username, password)
-            print(f"User {username} logged in.")
         except AuthError as e:
             f.flash(e.message)
         else:
@@ -136,6 +136,7 @@ def register_user(username, password):
             # commit to fail. Show a validation error.
             raise RegistrationError(f"User {username} is already registered.")
         else:
+            f.current_app.logger.info(f"Registered new user {username}")
             cb.add_to_room("lobby", username)
             # Success
 
@@ -150,5 +151,7 @@ def check_user(user, password):
         raise AuthError("Incorrect username or password.")
     if user == status_user:
         raise AuthError("Cannot log in as status user.")
+        f.current_app.logger.warning(f"Attempt to log in as status user {status_user}")
 
+    f.current_app.logger.info(f"User {user} logged in successfully.")
     return r
