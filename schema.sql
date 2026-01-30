@@ -23,6 +23,12 @@ CREATE TABLE messages (
  FOREIGN KEY (room) REFERENCES rooms (roomname) ON DELETE CASCADE
 );
 
+CREATE TABLE apitokens (
+  token TEXT PRIMARY KEY,
+  username TEXT NOT NULL,
+  FOREIGN KEY (username) REFERENCES user (username)
+);
+
 CREATE TABLE rooms (
   roomname TEXT NOT NULL,
   member TEXT NOT NULL,
