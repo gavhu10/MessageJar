@@ -52,6 +52,8 @@ def __close_db(e=None):
 
 def init_db():
     """Clear existing data and create new tables."""
+
+    f.current_app.logger.info("Initializing database.")
     with DBConnection() as db:
         with f.current_app.open_resource("schema.sql") as file:
             db.executescript(file.read().decode("utf8"))

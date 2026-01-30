@@ -38,17 +38,11 @@ def create_room(room_name, creator):
 def notify(content, room):
     """Send a notification message to a room."""
 
-    print(user_exists(status_user))
-    print(get_rooms(status_user))
-
-    print(f"Notifying room {room}: {content}")
     add_message(status_user, content, room)
 
 
 def add_message(author, message, room, force=False):
     """Add a message to the database."""
-
-    print(f"Adding message to room {room} from {author}: {message}")
 
     if not (force or room in get_rooms(author)):
         raise AuthError(f"User {author} is not a member of room {room}.")
@@ -292,10 +286,10 @@ def get_messages(room, message_num=0):
         )
         now = datetime.now(ZoneInfo("UTC"))
         now = datetime.now(ZoneInfo("America/New_York"))
-        print(f"Lobby created at {time}. Now is {now}. Difference is {now - time}")
         difference = now - time
         if difference.total_seconds() > 86400:  # 24 hours in seconds
             clear_room("lobby")
+            f.current_app.logger.info("Cleared lobby.")
             return []
 
     return data[message_num:]
