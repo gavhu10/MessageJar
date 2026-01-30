@@ -2,6 +2,7 @@ from db import DBConnection
 
 from zoneinfo import ZoneInfo
 from datetime import datetime
+import flask as f
 
 status_user = "Message Jar"
 
@@ -140,7 +141,7 @@ def add_message(author, message, room, force=False):
                 return None  # not sure if this is needed
 
 
-# Note: you may need to cripple this funcion if you alreay are in the EST timezone
+# Note: you may need to cripple this funcion if you already are in the EST timezone
 def to_est(time):
     """Convert a datetime.datetime object to GMT time string."""
     r = time.astimezone(ZoneInfo("America/New_York"))
