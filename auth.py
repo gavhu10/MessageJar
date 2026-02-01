@@ -168,3 +168,41 @@ def change_password(username, old_password, new_password):
             (generate_password_hash(new_password), username),
         )
         db.commit()
+
+
+def check_valid_token(token):
+    with DBConnection() as db:
+        r = db.execute(
+            "SELECT username FROM apitokens WHERE token = ?", (token,)
+        ).fetchone()
+
+    if r is None:
+        raise AuthError("Token not valid")
+    else:
+        return r[0]
+
+
+def generate_api_token(username, name):
+    """Generate an API token for a user."""
+
+    token = secrets.token_urlsafe(32)
+    with DBConnection() as db:
+        db.execute(
+            "INSERT INTO apitokens (username, token, tokenname) VALUES (?, ?, ?)",
+            (username, token, name),
+        )
+        db.commit()
+    f.current_app.logger.info(f"Generated API token for user {username}.")
+    return token
+
+
+def revoke_api_token(token):
+    """Revoke an API token."""
+
+    with DBConnection() as db:
+        db.execute(
+            "DELETE FROM apitokens WHERE token = ?",
+            (token,),
+        )
+        db.commit()
+    f.current_app.logger.info(f"Revoked API token.")

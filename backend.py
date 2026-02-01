@@ -294,3 +294,20 @@ def get_messages(room, message_num=0):
             return []
 
     return data[message_num:]
+
+
+def list_tokens(user):
+    """List all API tokens for a user."""
+
+    with DBConnection() as db:
+        tokens = db.execute(
+            """
+        SELECT tokenname, token
+        FROM apitokens
+        WHERE username = ?;""",
+            (user,),
+        ).fetchall()
+
+    token_list = [{"tokenname": t["tokenname"], "token": t["token"]} for t in tokens]
+
+    return token_list
