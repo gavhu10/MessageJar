@@ -5,8 +5,36 @@ import backend as cb
 from backend import NotAllowedError, AuthError
 from auth import RegistrationError
 
+DEBUG = False
 
 api = f.Blueprint("api", __name__, url_prefix="/api")
+
+
+def token_required(func):
+    """Decorator to require a valid API token for a view."""
+
+    def wrapper(**kwargs):
+        token = f.request.values.get("token")
+
+        if token is None:
+            f.abort(400)
+
+        try:
+            username = auth.check_valid_token(token)
+        except AuthError:
+            f.abort(403)
+
+        return func(username=username, **kwargs)
+
+    wrapper.__name__ = func.__name__
+    return wrapper
+
+
+def get_methods():
+    if DEBUG:
+        return ["GET", "POST"]
+    else:
+        return ["POST"]
 
 
 def get_kv(request, keys, optional=[]):
@@ -23,8 +51,9 @@ def get_kv(request, keys, optional=[]):
     return r
 
 
-@api.route("/get", methods=["GET", "POST"])
-def api_get():
+@api.route("/get", methods=get_methods())
+@token_required
+def api_get(username):
 
     try:
         args = get_kv(f.request, ["token", "latest", "room"], ["latest"])
@@ -36,50 +65,37 @@ def api_get():
     except (ValueError, TypeError):
         latest = 0
 
-    try:
-        username = auth.check_valid_token(args["token"])
-    except AuthError:
+    if username not in cb.get_room_members(args["room"]):
         f.abort(403)
-    else:
-        if username not in cb.get_room_members(args["room"]):
-            f.abort(403)
-        return f.jsonify(cb.get_messages(args["room"], latest))
+    return f.jsonify(cb.get_messages(args["room"], latest))
 
 
-@api.route("/send", methods=["POST", "GET"])
-def api_send():
+@api.route("/send", methods=get_methods())
+@token_required
+def api_send(username):
 
     try:
         args = get_kv(f.request, ["token", "message", "room"])
     except ValueError:
         f.abort(400)
 
-    try:
-        username = auth.check_valid_token(args["token"])
-    except AuthError:
-        f.abort(403)
-
     rooms = cb.get_rooms(username)
     if not args["room"] in rooms:
         f.abort(403)
 
     cb.add_message(username, args["message"], args["room"])
-    return "OK"
+    return f.jsonify({"status": "ok"})
 
 
-@api.route("/manage/rooms", methods=["GET", "POST"])
-def manage_rooms():
+@api.route("/rooms/<action>", methods=get_methods())
+@token_required
+def manage_rooms(username, action):
     try:
-        args = get_kv(f.request, ["token", "action", "room"], ["room"])
+        args = get_kv(f.request, ["token", "room"], ["room"])
     except ValueError:
         f.abort(400)
 
-    try:
-        username = auth.check_valid_token(args["token"])
-    except AuthError:
-        f.abort(403)
-
-    match args["action"]:
+    match action:
         case "list_rooms":
             rooms = cb.get_rooms(username)
             return f.jsonify(rooms)
@@ -94,10 +110,10 @@ def manage_rooms():
             f.abort(400)
 
 
-@api.route("/manage/user", methods=["GET", "POST"])
-def manage_user():
+@api.route("/user/<action>", methods=get_methods())
+def manage_user(action):
     try:
-        args = get_kv(f.request, ["username", "password", "action", "name"], ["name"])
+        args = get_kv(f.request, ["username", "password", "name"], ["name"])
     except ValueError:
         f.abort(400)
 
@@ -107,7 +123,7 @@ def manage_user():
         except AuthError:
             f.abort(403)
 
-    match args["action"]:
+    match action:
         case "new_user":
             try:
                 auth.register_user(args["username"], args["password"])
@@ -133,19 +149,15 @@ def manage_user():
             f.abort(400)
 
 
-@api.route("/manage/token", methods=["GET", "POST"])
-def manage_token():
+@api.route("/token/<action>", methods=get_methods())
+@token_required
+def manage_token(username, action):
     try:
-        args = get_kv(f.request, ["token", "action", "name"], ["name"])
+        args = get_kv(f.request, ["token", "name"], ["name"])
     except ValueError:
         f.abort(400)
 
-    try:
-        username = auth.check_valid_token(args["token"])
-    except AuthError:
-        f.abort(403)
-
-    match args["action"]:
+    match action:
         case "get_username":
             return f.jsonify({"username": username})
         case "revoke_token":
