@@ -13,6 +13,21 @@ flask run --debug
 Otherwise, use one of the options detailed by the flask documentation [here](https://flask.palletsprojects.com/en/stable/deploying/).
 
 
+## API
+
+### Create account
+### Verify account
+### Generate token
+### List tokens
+### Verify token
+### Revoke token
+### Create room
+### List rooms
+### Send message
+### Get messages
+### Change password
+
+
 ## Todo  
 
  - [x] better css

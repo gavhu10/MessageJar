@@ -4,6 +4,7 @@ import auth
 import backend as cb
 from backend import NotAllowedError, AuthError
 from auth import RegistrationError
+from functools import wraps
 
 DEBUG = False
 
@@ -13,6 +14,7 @@ api = f.Blueprint("api", __name__, url_prefix="/api")
 def token_required(func):
     """Decorator to require a valid API token for a view."""
 
+    @wraps(func)
     def wrapper(**kwargs):
         token = f.request.values.get("token")
 
@@ -22,11 +24,10 @@ def token_required(func):
         try:
             username = auth.check_valid_token(token)
         except AuthError:
-            f.abort(403)
+            f.abort(401)
 
         return func(username=username, **kwargs)
 
-    wrapper.__name__ = func.__name__
     return wrapper
 
 
@@ -37,7 +38,8 @@ def get_methods():
         return ["POST"]
 
 
-def get_kv(request, keys, optional=[]):
+def get_kv(request, keys, optional=None):
+    optional = optional or []
     r = {}
 
     for key in keys:
@@ -56,7 +58,7 @@ def get_kv(request, keys, optional=[]):
 def api_get(username):
 
     try:
-        args = get_kv(f.request, ["token", "latest", "room"], ["latest"])
+        args = get_kv(f.request, ["latest", "room"], ["latest"])
     except ValueError:
         f.abort(400)
 
@@ -75,7 +77,7 @@ def api_get(username):
 def api_send(username):
 
     try:
-        args = get_kv(f.request, ["token", "message", "room"])
+        args = get_kv(f.request, ["message", "room"])
     except ValueError:
         f.abort(400)
 
@@ -91,77 +93,76 @@ def api_send(username):
 @token_required
 def manage_rooms(username, action):
     try:
-        args = get_kv(f.request, ["token", "room"], ["room"])
+        args = get_kv(f.request, ["room"], ["room"])
     except ValueError:
         f.abort(400)
 
     match action:
-        case "list_rooms":
+        case "list":
             rooms = cb.get_rooms(username)
             return f.jsonify(rooms)
-
-        case "create_room":
+        case "create":
             try:
                 cb.create_room(args["room"], username)
             except NotAllowedError:
                 f.abort(403)
             return f.jsonify({"status": "ok"})
         case _:
-            f.abort(400)
+            f.abort(404)
 
 
 @api.route("/user/<action>", methods=get_methods())
 def manage_user(action):
     try:
-        args = get_kv(f.request, ["username", "password", "name"], ["name"])
+        args = get_kv(f.request, ["username", "password", "name", "newpass"], ["name", "newpass"])
     except ValueError:
         f.abort(400)
 
-    if args["action"] != "new_user":
+    if action != "new":
         try:
             auth.check_user(args["username"], args["password"])
         except AuthError:
             f.abort(403)
 
     match action:
-        case "new_user":
+        case "new":
             try:
                 auth.register_user(args["username"], args["password"])
             except RegistrationError:
                 f.abort(403)
             return f.jsonify({"status": "ok"})
-        case "list_tokens":
+        case "tokens":
             return f.jsonify(cb.list_tokens(args["username"]))
-        case "verify_user":
-            try:
-                auth.check_user(args["username"], args["password"])
-            except AuthError:
-                f.abort(403)
-
+        case "verify":
             return f.jsonify({"status": "ok"})
-        case "generate_token":
+        case "generate":
             if args["name"]:
                 return f.jsonify(
                     {"token": auth.generate_api_token(args["username"], args["name"])}
                 )
             f.abort(400)
-        case _:
+        case "changepass":
+            if args["newpass"]:
+                auth.change_password(args["username"], args["password"], args["newpass"])
+                return f.jsonify({"status": "ok"})
             f.abort(400)
+        case _:
+            f.abort(404)
 
 
 @api.route("/token/<action>", methods=get_methods())
 @token_required
 def manage_token(username, action):
     try:
-        args = get_kv(f.request, ["token", "name"], ["name"])
+        args = get_kv(f.request, ["name"], ["name"])
     except ValueError:
         f.abort(400)
 
     match action:
-        case "get_username":
+        case "username":
             return f.jsonify({"username": username})
-        case "revoke_token":
+        case "revoke":
             auth.revoke_api_token(args["token"])
             return f.jsonify({"status": "ok"})
         case _:
-            f.abort(400)
+            f.abort(404)
