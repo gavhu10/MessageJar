@@ -19,12 +19,12 @@ def token_required(func):
         token = f.request.values.get("token")
 
         if token is None:
-            f.abort(400)
+            return missing_arg("token")
 
         try:
             username = auth.check_valid_token(token)
         except AuthError:
-            f.abort(401)
+            return f.jsonify({"e": "Token not valid!"}), 401
 
         return func(username=username, **kwargs)
 
@@ -53,6 +53,14 @@ def get_kv(request, keys, optional=None):
     return r
 
 
+def missing_arg(arg=None):
+    if arg is None:
+        string = "Missing argument(s)!"
+    else:
+        string = f'Missing argument "{arg}"!'
+    return f.jsonify({"e": string}), 400
+
+
 @api.route("/get", methods=get_methods())
 @token_required
 def api_get(username):
@@ -60,15 +68,15 @@ def api_get(username):
     try:
         args = get_kv(f.request, ["latest", "room"], ["latest"])
     except ValueError:
-        f.abort(400)
+        return missing_arg("room")
 
     try:
         latest = int(args["latest"])
     except (ValueError, TypeError):
         latest = 0
 
-    if username not in cb.get_room_members(args["room"]):
-        f.abort(403)
+    if args["room"] not in cb.get_rooms(username):
+        return f.jsonify({"e": "Not a member of this room!"}), 401
     return f.jsonify(cb.get_messages(args["room"], latest))
 
 
@@ -79,11 +87,11 @@ def api_send(username):
     try:
         args = get_kv(f.request, ["message", "room"])
     except ValueError:
-        f.abort(400)
+        return missing_arg("room")
 
     rooms = cb.get_rooms(username)
     if not args["room"] in rooms:
-        f.abort(403)
+        return f.jsonify({"e": "Not a member of this room!"}), 401
 
     cb.add_message(username, args["message"], args["room"])
     return f.jsonify({"status": "ok"})
@@ -95,18 +103,25 @@ def manage_rooms(username, action):
     try:
         args = get_kv(f.request, ["room"], ["room"])
     except ValueError:
-        f.abort(400)
+        return missing_arg("room")
 
     match action:
         case "list":
             rooms = cb.get_rooms(username)
             return f.jsonify(rooms)
         case "create":
-            try:
-                cb.create_room(args["room"], username)
-            except NotAllowedError:
-                f.abort(403)
-            return f.jsonify({"status": "ok"})
+            if args["room"]:
+                try:
+                    cb.create_room(args["room"], username)
+                except NotAllowedError:
+                    return (
+                        f.jsonify(
+                            {"e": f'Room with the name "{args["room"]}" alread exists!'}
+                        ),
+                        400,
+                    )
+                return f.jsonify({"status": "ok"})
+            return missing_arg("room")
         case _:
             f.abort(404)
 
@@ -114,22 +129,24 @@ def manage_rooms(username, action):
 @api.route("/user/<action>", methods=get_methods())
 def manage_user(action):
     try:
-        args = get_kv(f.request, ["username", "password", "name", "newpass"], ["name", "newpass"])
+        args = get_kv(
+            f.request, ["username", "password", "name", "newpass"], ["name", "newpass"]
+        )
     except ValueError:
-        f.abort(400)
+        return missing_arg()
 
     if action != "new":
         try:
             auth.check_user(args["username"], args["password"])
         except AuthError:
-            f.abort(403)
+            return f.jsonify({"e": "Username or password incorrect!"})
 
     match action:
         case "new":
             try:
                 auth.register_user(args["username"], args["password"])
             except RegistrationError:
-                f.abort(403)
+                return f.jsonify({"e": f'User "{args["username"]}" already exists!'})
             return f.jsonify({"status": "ok"})
         case "tokens":
             return f.jsonify(cb.list_tokens(args["username"]))
@@ -140,12 +157,14 @@ def manage_user(action):
                 return f.jsonify(
                     {"token": auth.generate_api_token(args["username"], args["name"])}
                 )
-            f.abort(400)
+            return missing_arg("name")
         case "changepass":
             if args["newpass"]:
-                auth.change_password(args["username"], args["password"], args["newpass"])
+                auth.change_password(
+                    args["username"], args["password"], args["newpass"]
+                )
                 return f.jsonify({"status": "ok"})
-            f.abort(400)
+            return missing_arg("newpass")
         case _:
             f.abort(404)
 
@@ -154,9 +173,9 @@ def manage_user(action):
 @token_required
 def manage_token(username, action):
     try:
-        args = get_kv(f.request, ["name"], ["name"])
+        args = get_kv(f.request, ["name", "token"], ["name"])
     except ValueError:
-        f.abort(400)
+        return missing_arg("name")
 
     match action:
         case "username":
