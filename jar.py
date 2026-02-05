@@ -10,40 +10,34 @@ status_user = "Message Jar"
 jar = f.Blueprint("jar", __name__, url_prefix="/jar")
 
 
-@jar.route("/")
+@jar.route("/", methods=["GET", "POST"])
 @login_required
 def index():
+    if f.request.method == "GET":
+        return f.render_template(
+            "jars/main.html", room_list=cb.get_rooms(f.g.user["username"])
+        )
+
+    error = None
+
+    room_name = f.request.form.get("room_name")
+
+    if not room_name:
+        error = "Room name is required!"
+
+    if error is None:
+        try:
+            cb.create_room(room_name, f.g.user["username"])
+        except cb.NotAllowedError as e:
+            error = e.message
+
+    if error is None:
+        return f.redirect(f.url_for("jar.room", room_name=room_name))
+
+    f.flash(error)
     return f.render_template(
         "jars/main.html", room_list=cb.get_rooms(f.g.user["username"])
     )
-
-
-@jar.route("/new_room", methods=("GET", "POST"))
-@login_required
-def new_room():
-
-    try:
-        room_name = f.request.form["room_name"]
-    except BadRequestKeyError:
-        room_name = None
-
-    if not room_name:
-        return f.render_template(
-            "quick-error.html",
-            error_message="Room name is required!",
-            new_location=f.url_for("jar.index"),
-        )
-
-    try:
-        cb.create_room(room_name, f.g.user["username"])
-    except cb.NotAllowedError as e:
-        if cb.member_count(room_name) > 0:
-            return f.render_template(
-                "quick-error.html",
-                error_message=e.message,
-                new_location=f.url_for("jar.index"),
-            )
-    return f.redirect(f.url_for("jar.room", room_name=room_name))
 
 
 @jar.route("/<room_name>")
