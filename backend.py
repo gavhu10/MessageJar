@@ -26,7 +26,7 @@ class NotAllowedError(Exception):
 def create_room(room_name, creator):
     """Create a new room with the given name and creator."""
     if member_count(room_name) > 0:
-        raise NotAllowedError(f"Room {room_name} already exists.")
+        raise NotAllowedError(f"Room {room_name} already exists!")
     add_to_room(room_name, creator, isadmin=1)
     add_to_room(room_name, status_user)
     notify(
@@ -294,3 +294,20 @@ def get_messages(room, message_num=0):
             return []
 
     return data[message_num:]
+
+
+def list_tokens(user):
+    """List all API tokens for a user."""
+
+    with DBConnection() as db:
+        tokens = db.execute(
+            """
+        SELECT tokenname, token
+        FROM apitokens
+        WHERE username = ?;""",
+            (user,),
+        ).fetchall()
+
+    token_list = [{"tokenname": t["tokenname"], "token": t["token"]} for t in tokens]
+
+    return token_list
