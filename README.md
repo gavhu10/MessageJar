@@ -41,7 +41,7 @@ curl -d "username=user&password=pass123" http://127.0.0.1:5000/api/user/verify
 This generates a token if the given username and password are valid. It returns 
 ```json
 {"token": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"}
-````
+```
 
 This is an example curl command for it:
 ```bash

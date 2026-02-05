@@ -113,11 +113,9 @@ def manage_rooms(username, action):
             if args["room"]:
                 try:
                     cb.create_room(args["room"], username)
-                except NotAllowedError:
+                except NotAllowedError as e:
                     return (
-                        f.jsonify(
-                            {"e": f'Room with the name "{args["room"]}" alread exists!'}
-                        ),
+                        f.jsonify({"e": e.message}),
                         400,
                     )
                 return f.jsonify({"status": "ok"})
@@ -138,15 +136,15 @@ def manage_user(action):
     if action != "new":
         try:
             auth.check_user(args["username"], args["password"])
-        except AuthError:
-            return f.jsonify({"e": "Username or password incorrect!"})
+        except AuthError as e:
+            return f.jsonify({"e": e.message})
 
     match action:
         case "new":
             try:
                 auth.register_user(args["username"], args["password"])
-            except RegistrationError:
-                return f.jsonify({"e": f'User "{args["username"]}" already exists!'})
+            except RegistrationError as e:
+                return f.jsonify({"e": e.message})
             return f.jsonify({"status": "ok"})
         case "tokens":
             return f.jsonify(cb.list_tokens(args["username"]))

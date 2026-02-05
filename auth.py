@@ -148,10 +148,10 @@ def check_user(user, password):
         r = db.execute("SELECT * FROM user WHERE username = ?", (user,)).fetchone()
 
     if r is None or not check_password_hash(r["password"], password):
-        raise AuthError("Incorrect username or password.")
+        raise AuthError("Incorrect username or password!")
     if user == status_user:
-        raise AuthError("Cannot log in as status user.")
         f.current_app.logger.warning(f"Attempt to log in as status user {status_user}")
+        raise AuthError("Cannot log in as status user!")
 
     f.current_app.logger.info(f"User {user} logged in successfully.")
     return r
