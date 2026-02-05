@@ -5,7 +5,7 @@ import secrets
 
 import backend as cb
 from db import DBConnection
-from backend import AuthError
+from backend import AuthError, NotAllowedError
 
 status_user = "Message Jar"
 
@@ -184,6 +184,14 @@ def check_valid_token(token):
 
 def generate_api_token(username, name):
     """Generate an API token for a user."""
+
+    with DBConnection() as db:
+        r = db.execute(
+            "SELECT username FROM apitokens WHERE tokenname = ?", (name,)
+        ).fetchone()
+
+    if r is not None:
+        raise NotAllowedError(f'Token with name "{name}" already exists!')
 
     token = secrets.token_urlsafe(32)
     with DBConnection() as db:

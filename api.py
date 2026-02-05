@@ -154,9 +154,16 @@ def manage_user(action):
             return f.jsonify({"status": "ok"})
         case "generate":
             if args["name"]:
-                return f.jsonify(
-                    {"token": auth.generate_api_token(args["username"], args["name"])}
-                )
+                try:
+                    return f.jsonify(
+                        {
+                            "token": auth.generate_api_token(
+                                args["username"], args["name"]
+                            )
+                        }
+                    )
+                except NotAllowedError as e:
+                    return f.jsonify({"e": e.message}), 400
             return missing_arg("name")
         case "changepass":
             if args["newpass"]:
