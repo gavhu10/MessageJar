@@ -12,8 +12,11 @@ flask run --debug
 ```
 Otherwise, use one of the options detailed by the flask documentation [here](https://flask.palletsprojects.com/en/stable/deploying/).
 
+<details>
 
-## API
+<summary>API Specification</summary>
+
+## API Specification
 
 On failure, the server returns an HTTP 4xx error with a JSON body `{"error": "Error message"}`.
 
@@ -141,7 +144,7 @@ This endpoint is for changing the user’s password. It also returns `{"status":
 ```bash
 curl -d "username=user&password=pass123&newpass=long and much more secure password194827349!" http://127.0.0.1:5000/api/user/changepass
 ```
-
+</details>
 
 
 
