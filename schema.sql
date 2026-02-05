@@ -27,7 +27,9 @@ CREATE TABLE messages (
 CREATE TABLE apitokens (
   token TEXT PRIMARY KEY,
   username TEXT NOT NULL,
-  FOREIGN KEY (username) REFERENCES user (username)
+  tokenname TEXT NOT NULL,
+  created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (username) REFERENCES user (username) ON DELETE CASCADE
 );
 
 CREATE TABLE rooms (

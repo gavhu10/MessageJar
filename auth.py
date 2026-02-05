@@ -5,7 +5,7 @@ import secrets
 
 import backend as cb
 from db import DBConnection
-from backend import AuthError
+from backend import AuthError, NotAllowedError
 
 status_user = "Message Jar"
 
@@ -148,10 +148,10 @@ def check_user(user, password):
         r = db.execute("SELECT * FROM user WHERE username = ?", (user,)).fetchone()
 
     if r is None or not check_password_hash(r["password"], password):
-        raise AuthError("Incorrect username or password.")
+        raise AuthError("Incorrect username or password!")
     if user == status_user:
-        raise AuthError("Cannot log in as status user.")
         f.current_app.logger.warning(f"Attempt to log in as status user {status_user}")
+        raise AuthError("Cannot log in as status user!")
 
     f.current_app.logger.info(f"User {user} logged in successfully.")
     return r
@@ -168,3 +168,49 @@ def change_password(username, old_password, new_password):
             (generate_password_hash(new_password), username),
         )
         db.commit()
+
+
+def check_valid_token(token):
+    with DBConnection() as db:
+        r = db.execute(
+            "SELECT username FROM apitokens WHERE token = ?", (token,)
+        ).fetchone()
+
+    if r is None:
+        raise AuthError("Token not valid")
+    else:
+        return r[0]
+
+
+def generate_api_token(username, name):
+    """Generate an API token for a user."""
+
+    with DBConnection() as db:
+        r = db.execute(
+            "SELECT username FROM apitokens WHERE tokenname = ?", (name,)
+        ).fetchone()
+
+    if r is not None:
+        raise NotAllowedError(f'Token with name "{name}" already exists!')
+
+    token = secrets.token_urlsafe(32)
+    with DBConnection() as db:
+        db.execute(
+            "INSERT INTO apitokens (username, token, tokenname) VALUES (?, ?, ?)",
+            (username, token, name),
+        )
+        db.commit()
+    f.current_app.logger.info(f"Generated API token for user {username}.")
+    return token
+
+
+def revoke_api_token(token):
+    """Revoke an API token."""
+
+    with DBConnection() as db:
+        db.execute(
+            "DELETE FROM apitokens WHERE token = ?",
+            (token,),
+        )
+        db.commit()
+    f.current_app.logger.info(f"Revoked API token.")
