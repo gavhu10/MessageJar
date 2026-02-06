@@ -187,7 +187,8 @@ def generate_api_token(username, name):
 
     with DBConnection() as db:
         r = db.execute(
-            "SELECT username FROM apitokens WHERE tokenname = ?", (name,)
+            "SELECT token FROM apitokens WHERE username = ? AND tokenname = ?",
+            (username, name),
         ).fetchone()
 
     if r is not None:

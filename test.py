@@ -13,13 +13,17 @@ HOST = "127.0.0.1"
 PORT = 5000
 BASE_URL = f"http://{HOST}:{PORT}"
 PYTHON_EXE = sys.executable
-USERNAME = "t"
-PASSWORD = "t"
+U1 = "t"
+P1 = "t"
+
+U2 = "r"
+P2 = "r"
 
 
 class TestChatIntegration(unittest.TestCase):
     server_process = None
-    token = None
+    token1 = None
+    token2 = None
 
     @classmethod
     def setUpClass(cls):
@@ -104,79 +108,87 @@ class TestChatIntegration(unittest.TestCase):
     # Tests are numbered to ensure sequential execution (flow dependence)
 
     def test_01_create_account(self):
-        resp = self._post("/api/user/new", {"username": USERNAME, "password": PASSWORD})
+        resp = self._post("/api/user/new", {"username": U1, "password": P1})
         self.assertEqual(resp, {"status": "ok"}, "create account failed")
+        resp = self._post("/api/user/new", {"username": U2, "password": P2})
+        self.assertEqual(resp, {"status": "ok"}, "create second account failed")
 
     def test_02_duel_create_account(self):
-        resp = self._post("/api/user/new", {"username": USERNAME, "password": PASSWORD})
+        resp = self._post("/api/user/new", {"username": U1, "password": P1})
         self.assertNotEqual(resp.get("e"), None, "dual account creation possible")
 
     def test_03_verify_account(self):
-        resp = self._post(
-            "/api/user/verify", {"username": USERNAME, "password": PASSWORD}
-        )
+        resp = self._post("/api/user/verify", {"username": U1, "password": P1})
         self.assertEqual(resp, {"status": "ok"}, "verify account failed")
+        resp = self._post("/api/user/verify", {"username": U2, "password": P2})
+        self.assertEqual(resp, {"status": "ok"}, "verify second account failed")
 
     def test_04_verify_account_hack(self):
-        resp = self._post(
-            "/api/user/verify", {"username": USERNAME, "password": "foobar"}
-        )
+        resp = self._post("/api/user/verify", {"username": U1, "password": "foobar"})
         self.assertNotEqual(
             resp.get("e"),
-            {"status": "ok"},
+            None,
             "verify account succeded with wrong password",
         )
 
     def test_05_generate_token(self):
         resp = self._post(
             "/api/user/generate",
-            {"username": USERNAME, "password": PASSWORD, "name": "test"},
+            {"username": U1, "password": P1, "name": "test"},
         )
         token = resp.get("token")
         if not token:
             self.fail(f"Generate token did not return token. Resp: {resp}")
+        self.__class__.token1 = token
+        resp = self._post(
+            "/api/user/generate",
+            {"username": U2, "password": P2, "name": "test"},
+        )
+        token = resp.get("token")
+        if not token:
+            self.fail(f"Generate secone token did not return token. Resp: {resp}")
 
-        # Store token in class variable for subsequent tests
-        self.__class__.token = token
-        print(f"Token generated: {token}")
+        self.__class__.token2 = token
 
     def test_06_generate_overlap_token(self):
         resp = self._post(
             "/api/user/generate",
-            {"username": USERNAME, "password": PASSWORD, "name": "test"},
+            {"username": U1, "password": P1, "name": "test"},
         )
         token = resp.get("token")
         if token:
             self.fail(f"Token overwritten!")
 
     def test_07_list_tokens(self):
-        resp = self._post(
-            "/api/user/tokens", {"username": USERNAME, "password": PASSWORD}
-        )
+        resp = self._post("/api/user/tokens", {"username": U1, "password": P1})
 
         has_test = any(t.get("tokenname") == "test" for t in resp)
         self.assertTrue(has_test, f"Tokens list does not contain 'test'. Resp: {resp}")
 
     def test_08_verify_token_username(self):
-        resp = self._post("/api/token/username", {"token": self.__class__.token})
+        resp = self._post("/api/token/username", {"token": self.__class__.token1})
         self.assertEqual(
-            resp.get("username"), USERNAME, "Token verification returned wrong username"
+            resp.get("username"), U1, "Token verification returned wrong username"
+        )
+        resp = self._post("/api/token/username", {"token": self.__class__.token2})
+        self.assertEqual(
+            resp.get("username"), U2, "Token verification returned wrong username"
         )
 
     def test_09_create_room(self):
         resp = self._post(
-            "/api/rooms/create", {"token": self.__class__.token, "room": "test"}
+            "/api/rooms/create", {"token": self.__class__.token1, "room": "test"}
         )
         self.assertEqual(resp, {"status": "ok"}, "create room failed")
 
     def test_10_create_duel_room(self):
         resp = self._post(
-            "/api/rooms/create", {"token": self.__class__.token, "room": "test"}
+            "/api/rooms/create", {"token": self.__class__.token1, "room": "test"}
         )
         self.assertNotEqual(resp.get("e"), None, "room overwritten")
 
     def test_11_list_rooms(self):
-        resp = self._post("/api/rooms/list", {"token": self.__class__.token})
+        resp = self._post("/api/rooms/list", {"token": self.__class__.token1})
         self.assertIn("lobby", resp, "Rooms list missing lobby")
         self.assertIn("test", resp, "Rooms list missing test room")
 
@@ -184,43 +196,113 @@ class TestChatIntegration(unittest.TestCase):
         resp = self._post(
             "/api/send",
             {
-                "token": self.__class__.token,
+                "token": self.__class__.token1,
                 "room": "test",
-                "message": f"test from {USERNAME}",
+                "message": f"test from {U1}",
             },
         )
         self.assertEqual(resp, {"status": "ok"}, "send message failed")
 
     def test_13_get_messages(self):
-        resp = self._post("/api/get", {"token": self.__class__.token, "room": "test"})
+        resp = self._post("/api/get", {"token": self.__class__.token1, "room": "test"})
 
         match = False
         for msg in resp:
-            if msg.get("author") == USERNAME and f"test from {USERNAME}" in msg.get(
-                "content", ""
-            ):
+            if msg.get("author") == U1 and f"test from {U1}" in msg.get("content", ""):
                 match = True
                 break
 
-        self.assertTrue(
-            match, f"Message from {USERNAME} not found in response. Resp: {resp}"
-        )
+        self.assertTrue(match, f"Message from {U1} not found in response. Resp: {resp}")
 
-    def test_14_revoke_token(self):
-        resp = self._post("/api/token/revoke", {"token": self.__class__.token})
+    def test_14_add_to_room(self):
+        resp = self._post(
+            "/api/send",
+            {
+                "token": self.__class__.token1,
+                "room": "test",
+                "message": f"/add {U2}",
+            },
+        )
+        self.assertEqual(resp, {"status": "ok"}, "send message failed")
+
+        resp = self._post("/api/rooms/list", {"token": self.__class__.token2})
+        self.assertIn("test", resp, "Invite failed")
+
+    def test_15_remove_from_room(self):
+        resp = self._post(
+            "/api/send",
+            {
+                "token": self.__class__.token1,
+                "room": "test",
+                "message": f"/remove {U2}",
+            },
+        )
+        self.assertEqual(resp, {"status": "ok"}, "send message failed")
+
+        resp = self._post("/api/rooms/list", {"token": self.__class__.token2})
+        self.assertNotIn("test", resp, "Remove command failed")
+
+    def test_16_leave_room(self):
+        resp = self._post(
+            "/api/send",
+            {
+                "token": self.__class__.token1,
+                "room": "test",
+                "message": f"/add {U2}",
+            },
+        )
+        self.assertEqual(resp, {"status": "ok"}, "send /add message failed")
+
+        resp = self._post(
+            "/api/send",
+            {
+                "token": self.__class__.token2,
+                "room": "test",
+                "message": f"/leave",
+            },
+        )
+        self.assertEqual(resp, {"status": "ok"}, "send /leave message failed")
+
+        resp = self._post("/api/rooms/list", {"token": self.__class__.token2})
+        self.assertNotIn("test", resp, "Leave failed")
+
+    def test_17_delete_room(self):
+
+        resp = self._post(
+            "/api/send",
+            {
+                "token": self.__class__.token1,
+                "room": "test",
+                "message": f"/delete",
+            },
+        )
+        self.assertEqual(resp, {"status": "ok"}, "send message failed")
+
+        resp = self._post("/api/rooms/list", {"token": self.__class__.token1})
+        self.assertNotIn("test", resp, "Leave failed")
+
+    def test_18_test_enter_wrong_room(self):
+        resp = self._post("/api/get", {"token": self.__class__.token2, "room": "test"})
+
+        self.assertNotEqual(resp.get("e"), None, "entering unauthorized room possible")
+
+        resp = self._post("/api/get", {"token": self.__class__.token1, "room": "test"})
+
+        self.assertNotEqual(resp.get("e"), None, "entering deleted room possible")
+
+    def test_19_revoke_token(self):
+        resp = self._post("/api/token/revoke", {"token": self.__class__.token1})
         self.assertEqual(resp, {"status": "ok"}, "revoke token failed")
 
-    def test_15_change_password(self):
+    def test_20_change_password(self):
         resp = self._post(
             "/api/user/changepass",
-            {"username": USERNAME, "password": PASSWORD, "newpass": "r"},
+            {"username": U1, "password": P1, "newpass": "r"},
         )
         self.assertEqual(resp, {"status": "ok"}, "change password failed")
 
-    def test_16_check_change_password(self):
-        resp = self._post(
-            "/api/user/verify", {"username": USERNAME, "password": PASSWORD}
-        )
+    def test_21_check_change_password(self):
+        resp = self._post("/api/user/verify", {"username": U1, "password": P1})
 
         self.assertNotEqual(resp.get("e"), None, "change password failed")
 
