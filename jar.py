@@ -41,9 +41,12 @@ def index():
 
 
 @jar.route("/<room_name>")
+@login_required
 def room(room_name):
 
-    if cb.member_count(room_name) > 0:
+    if cb.member_count(room_name) > 0 and room_name in cb.get_rooms(
+        f.g.user["username"]
+    ):
         return f.render_template("jars/jar.html", room_name=room_name)
     else:
         abort(404)
@@ -52,7 +55,9 @@ def room(room_name):
 @jar.route("/endpoint/<room_name>", methods=("GET", "POST"))
 @login_required
 def endpoint(room_name):
-    if cb.member_count(room_name) > 0:
+    if cb.member_count(room_name) > 0 and room_name in cb.get_rooms(
+        f.g.user["username"]
+    ):
         if f.request.method == "GET":
 
             try:
@@ -62,7 +67,8 @@ def endpoint(room_name):
 
             return f.jsonify(cb.get_messages(room_name, latest))
 
-        elif f.request.method == "POST":
+        else:
             content = f.request.form["message"]
             cb.add_message(str(f.g.user["username"]), content, room_name)
             return "ok"
+    f.abort(404)
