@@ -12,6 +12,13 @@ flask run --debug
 ```
 Otherwise, use one of the options detailed by the flask documentation [here](https://flask.palletsprojects.com/en/stable/deploying/).
 
+## Slash commands
+
+Slash commands are how you manage your rooms (or jars). To use them, send them like a normal message.
+
+Send the `/help` command to print this message. Use `/add my_friend` to add user "my_friend". The `/remove` command is remarkable similar, although it accomplishes the inverse operation. To use it, send the message `/remove not_my_friend` to remove the user "not_my_friend". You can leave a room by sending the `/leave` command, although if you created the room, you will have to delete the room instead. This is done by sending the `/delete` command. (you will have to reload to see the effects.) But be careful: there is no recovering lost rooms.
+
+
 <details>
 
 <summary>API Specification</summary>

@@ -30,8 +30,7 @@ def create_room(room_name, creator):
     add_to_room(room_name, creator, isadmin=1)
     add_to_room(room_name, status_user)
     notify(
-        f'Room {room_name} created by {creator}. Commands: Use "/delete yes" to delete the room.\
-              Use "/add user" to add a user. Use "/leave" to leave the room.',
+        f'Room {room_name} created by {creator}. Send "/help" to see available commands',
         room_name,
     )
 
@@ -78,7 +77,7 @@ def add_message(author, message, room, force=False):
                     return None
                 except NotAllowedError:
                     notify(
-                        f"User {author} is not an admin and cannot delete the room.",
+                        f'User "{author}" is not an admin and cannot delete the room.',
                         room,
                     )
                     return None
@@ -105,7 +104,20 @@ def add_message(author, message, room, force=False):
                     return None
 
             case "help":
-                return None  # TODO implement help command
+                notify(
+                    (
+                        'Send the "/help" command to print this message.'
+                        ' Use "/add my_friend" to add user "my_friend".'
+                        ' The "/remove" command is remarkable similar, although it accomplishes the inverse operation.'
+                        ' To use it, send the message "/remove not_my_friend" to remove the user "not_my_friend".'
+                        ' You can leave a room by sending the "/leave" command,'
+                        " although if you created the room, you will have to delete the room instead."
+                        ' This is done by sending the "/delete" command. (you will have to reload to see the effects) But be careful:'
+                        " there is no recovering lost rooms."
+                    ),
+                    room,
+                )
+                return None
 
             case "remove":  # remove a user
 
