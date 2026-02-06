@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block header %}
+<h1>{% block title %}Tokens{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<br>
+
+{% if token_list %}
+Here are your tokens:
+
+
+<div id="tokens">
+    {% for i in token_list %}
+    <p>
+        <span>{{ i["tokenname"] }} - {{ i["token"] }}</span>
+        <!--material-symbols-light:delete-outline-sharp from https://icon-sets.iconify.design/-->
+        <a href="{{ url_for('user.rmtoken') }}?token={{ i['token'] }}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                <path fill="currentColor"
+                    d="M6 20V6H5V5h4v-.77h6V5h4v1h-1v14zm1-1h10V6H7zm2.808-2h1V8h-1zm3.384 0h1V8h-1zM7 6v13z" />
+            </svg>
+        </a>
+    </p>
+    {% endfor %}
+</div>
+
+{% endif %}
+
+<br>
+Create a new token here:
+<form action="{{ url_for('user.tokens') }}" method="post">
+    <input type="text" name="token_name" placeholder="Token name" autocomplete="off" required>
+    <input type="submit" value="Add Token">
+</form>
+{% endblock %}

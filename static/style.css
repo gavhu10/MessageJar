@@ -195,3 +195,19 @@ input[type=submit] {
   margin: 25px;
   border: 5px solid black;
 } */
+
+#tokens p {
+  display: flex;
+  align-items: center;
+  /* Vertically centers the text and SVG */
+  gap: 8px;
+  /* Adds a nice consistent space between text and icon */
+  margin-bottom: 10px;
+  /* Optional spacing between rows */
+}
+
+/* Optional: Ensures the SVG inherits the text color */
+#tokens svg {
+  display: block;
+  fill: currentColor;
+}
