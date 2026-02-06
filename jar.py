@@ -1,11 +1,10 @@
 import flask as f
-from werkzeug.exceptions import BadRequestKeyError, abort
-
-from auth import login_required
+from werkzeug.exceptions import abort
 
 import backend as cb
+from auth import login_required
 
-status_user = "Message Jar"
+STATUS_USER = "Message Jar"
 
 jar = f.Blueprint("jar", __name__, url_prefix="/jar")
 
@@ -48,8 +47,7 @@ def room(room_name):
         f.g.user["username"]
     ):
         return f.render_template("jars/jar.html", room_name=room_name)
-    else:
-        abort(404)
+    abort(404)
 
 
 @jar.route("/endpoint/<room_name>", methods=("GET", "POST"))
@@ -59,7 +57,6 @@ def endpoint(room_name):
         f.g.user["username"]
     ):
         if f.request.method == "GET":
-
             try:
                 latest = int(f.request.args.get("latest", 0))
             except (ValueError, TypeError):
@@ -67,8 +64,7 @@ def endpoint(room_name):
 
             return f.jsonify(cb.get_messages(room_name, latest))
 
-        else:
-            content = f.request.form["message"]
-            cb.add_message(str(f.g.user["username"]), content, room_name)
-            return "ok"
+        content = f.request.form["message"]
+        cb.add_message(str(f.g.user["username"]), content, room_name)
+        return "ok"
     f.abort(404)

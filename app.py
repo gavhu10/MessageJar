@@ -1,14 +1,14 @@
-import os
 import logging
+import os
+
 import click
-
-import db
-import auth
-import jar
-import api
-import user
-
 import flask as f
+
+import api
+import auth
+import db
+import jar
+import user
 
 
 @click.command("init")

@@ -1,12 +1,12 @@
-import unittest
-import urllib.request
-import urllib.parse
 import json
+import os
+import signal
 import subprocess
 import sys
 import time
-import os
-import signal
+import unittest
+import urllib.parse
+import urllib.request
 
 # Configuration
 HOST = "127.0.0.1"
@@ -157,7 +157,7 @@ class TestChatIntegration(unittest.TestCase):
         )
         token = resp.get("token")
         if token:
-            self.fail(f"Token overwritten!")
+            self.fail("Token overwritten!")
 
     def test_07_list_tokens(self):
         resp = self._post("/api/user/tokens", {"username": U1, "password": P1})
@@ -258,7 +258,7 @@ class TestChatIntegration(unittest.TestCase):
             {
                 "token": self.__class__.token2,
                 "room": "test",
-                "message": f"/leave",
+                "message": "/leave",
             },
         )
         self.assertEqual(resp, {"status": "ok"}, "send /leave message failed")
@@ -273,7 +273,7 @@ class TestChatIntegration(unittest.TestCase):
             {
                 "token": self.__class__.token1,
                 "room": "test",
-                "message": f"/delete",
+                "message": "/delete",
             },
         )
         self.assertEqual(resp, {"status": "ok"}, "send message failed")

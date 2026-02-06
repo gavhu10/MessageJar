@@ -1,6 +1,7 @@
 import flask as f
-import backend as cb
+
 import auth
+import backend as cb
 from backend import AuthError
 
 user = f.Blueprint("user", __name__, url_prefix="/user")
@@ -53,8 +54,7 @@ def rmtoken():
         try:
             if auth.check_valid_token(token) != f.g.user["username"]:
                 raise AuthError
-            else:
-                auth.revoke_api_token(token)
+            auth.revoke_api_token(token)
         except AuthError:
             message = "Invalid token!"
 
