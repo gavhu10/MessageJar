@@ -1,13 +1,14 @@
 import functools
-import flask as f
-from werkzeug.security import check_password_hash, generate_password_hash
 import secrets
 
-import backend as cb
-from db import DBConnection
-from backend import AuthError, NotAllowedError
+import flask as f
+from werkzeug.security import check_password_hash, generate_password_hash
 
-status_user = "Message Jar"
+import backend as cb
+from backend import AuthError, NotAllowedError
+from db import DBConnection
+
+STATUS_USER = "Message Jar"
 
 bp = f.Blueprint("auth", __name__, url_prefix="/auth")
 
@@ -79,8 +80,8 @@ def register():
 
         if error is None:
             return f.redirect(f.url_for("auth.login"))
-        else:
-            f.flash(error)
+
+        f.flash(error)
 
     return f.render_template("auth/register.html")
 
@@ -121,7 +122,7 @@ def register_user(username, password):
 
     if not username:
         raise RegistrationError("Username is required.")
-    elif not password:
+    if not password:
         raise RegistrationError("Password is required.")
 
     with DBConnection() as db:
@@ -149,8 +150,8 @@ def check_user(user, password):
 
     if r is None or not check_password_hash(r["password"], password):
         raise AuthError("Incorrect username or password!")
-    if user == status_user:
-        f.current_app.logger.warning(f"Attempt to log in as status user {status_user}")
+    if user == STATUS_USER:
+        f.current_app.logger.warning(f"Attempt to log in as status user {STATUS_USER}")
         raise AuthError("Cannot log in as status user!")
 
     f.current_app.logger.info(f"User {user} logged in successfully.")
@@ -178,8 +179,8 @@ def check_valid_token(token):
 
     if r is None:
         raise AuthError("Token not valid")
-    else:
-        return r[0]
+
+    return r[0]
 
 
 def generate_api_token(username, name):
@@ -214,4 +215,4 @@ def revoke_api_token(token):
             (token,),
         )
         db.commit()
-    f.current_app.logger.info(f"Revoked API token.")
+    f.current_app.logger.info("Revoked API token.")

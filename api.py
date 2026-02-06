@@ -1,10 +1,11 @@
-import flask as f
-import auth
-
-import backend as cb
-from backend import NotAllowedError, AuthError
-from auth import RegistrationError
 from functools import wraps
+
+import flask as f
+
+import auth
+import backend as cb
+from auth import RegistrationError
+from backend import AuthError, NotAllowedError
 
 DEBUG = False
 
@@ -34,8 +35,8 @@ def token_required(func):
 def get_methods():
     if DEBUG:
         return ["GET", "POST"]
-    else:
-        return ["POST"]
+
+    return ["POST"]
 
 
 def get_kv(request, keys, optional=None):
@@ -90,7 +91,7 @@ def api_send(username):
         return missing_arg("room")
 
     rooms = cb.get_rooms(username)
-    if not args["room"] in rooms:
+    if args["room"] not in rooms:
         return f.jsonify({"e": "Not a member of this room!"}), 401
 
     cb.add_message(username, args["message"], args["room"])

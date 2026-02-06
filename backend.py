@@ -1,10 +1,11 @@
-from db import DBConnection
-
-from zoneinfo import ZoneInfo
 from datetime import datetime
+from zoneinfo import ZoneInfo
+
 import flask as f
 
-status_user = "Message Jar"
+from db import DBConnection
+
+STATUS_USER = "Message Jar"
 
 
 class AuthError(Exception):
@@ -28,7 +29,7 @@ def create_room(room_name, creator):
     if member_count(room_name) > 0:
         raise NotAllowedError(f"Room {room_name} already exists!")
     add_to_room(room_name, creator, isadmin=1)
-    add_to_room(room_name, status_user)
+    add_to_room(room_name, STATUS_USER)
     notify(
         f'Room {room_name} created by {creator}. Send "/help" to see available commands',
         room_name,
@@ -38,7 +39,7 @@ def create_room(room_name, creator):
 def notify(content, room):
     """Send a notification message to a room."""
 
-    add_message(status_user, content, room)
+    add_message(STATUS_USER, content, room)
 
 
 def add_message(author, message, room, force=False):
@@ -48,7 +49,6 @@ def add_message(author, message, room, force=False):
         raise AuthError(f"User {author} is not a member of room {room}.")
 
     with DBConnection() as db:
-
         db.execute(
             "INSERT INTO messages (author, content, room) VALUES (?, ?, ?)",
             (author, message, room),
@@ -62,38 +62,34 @@ def add_message(author, message, room, force=False):
 
         match command:
             case "add":  # add a user
-
                 if user_exists(args):
                     add_to_room(room, args)
                     notify(f"{author} added user {args} to the room.", room)
-                    return None  # all these return None statements are becuse adding two messages at once breaks the ordering
                 else:
                     notify(f"User {args} does not exist!", room)
-                    return None
 
             case "delete":  # delete room
                 try:
                     delete_room(author, room)
-                    return None
                 except NotAllowedError:
                     notify(
                         f'User "{author}" is not an admin and cannot delete the room.',
                         room,
                     )
-                    return None
 
             case "leave":  # leave room
                 if is_admin(author, room):
                     notify(
-                        f'Admin {author} cannot leave the room. Use "/delete yes" to delete the room.',
+                        (
+                            f"Admin {author} cannot leave the room."
+                            'Use "/delete yes" to delete the room.'
+                        ),
                         room,
                     )
-                    return None
                 else:
                     notify(f"User {author} has left the room.", room)
 
                     with DBConnection() as db:
-
                         db.execute(
                             """DELETE FROM rooms
                                     WHERE roomname = ? AND member = ?;""",
@@ -101,45 +97,42 @@ def add_message(author, message, room, force=False):
                         )
                         db.commit()
 
-                    return None
-
             case "help":
                 notify(
                     (
                         'Send the "/help" command to print this message.'
                         ' Use "/add my_friend" to add user "my_friend".'
-                        ' The "/remove" command is remarkable similar, although it accomplishes the inverse operation.'
+                        ' The "/remove" command is remarkable similar, '
+                        "although it accomplishes the inverse operation."
                         ' To use it, send the message "/remove not_my_friend" to remove the user "not_my_friend".'
                         ' You can leave a room by sending the "/leave" command,'
                         " although if you created the room, you will have to delete the room instead."
-                        ' This is done by sending the "/delete" command. (you will have to reload to see the effects) But be careful:'
+                        ' This is done by sending the "/delete" command. '
+                        "(you will have to reload to see the effects) But be careful:"
                         " there is no recovering lost rooms."
                     ),
                     room,
                 )
-                return None
 
             case "remove":  # remove a user
-
                 if author == args:
                     notify(
-                        f'You cannot remove yourself! Use "/leave" to leave the room.',
+                        'You cannot remove yourself! Use "/leave" to leave the room.',
                         room,
                     )
-                    return None
+
                 elif is_admin(args, room):
                     notify(
                         f"User {author} is an admin and cannot be removeed.",
                         room,
                     )
-                    return None
+
                 else:
                     notify(
                         f"User {args} has been removed from the room by {author}.", room
                     )
 
                     with DBConnection() as db:
-
                         db.execute(
                             """DELETE FROM rooms
                                     WHERE roomname = ? AND member = ?;""",
@@ -147,10 +140,8 @@ def add_message(author, message, room, force=False):
                         )
                         db.commit()
 
-                    return None
-
             case _:
-                return None  # not sure if this is needed
+                pass
 
 
 # Note: you may need to cripple this funcion if you already are in the EST timezone
@@ -209,7 +200,6 @@ def add_to_room(room_name, user, isadmin=0):
     means that the room will be created.
     """
     with DBConnection() as db:
-
         db.execute(
             "INSERT INTO rooms (roomname, member, isadmin) VALUES (?, ?, ?)",
             (room_name, user, isadmin),
@@ -220,12 +210,11 @@ def add_to_room(room_name, user, isadmin=0):
 def user_exists(user):
     """Check if a user exists in the database."""
     with DBConnection() as db:
-
         r = db.execute("SELECT * FROM user WHERE username = ?", (user,)).fetchone()
     if r is None:
         return False
-    else:
-        return True
+
+    return True
 
 
 def get_rooms(user):
@@ -257,10 +246,7 @@ def is_admin(user, room):
             (room, user),
         ).fetchone()
 
-    if r and r["isadmin"] == 1:
-        return True
-    else:
-        return False
+    return bool(r and r["isadmin"] == 1)
 
 
 def get_messages(room, message_num=0):
@@ -279,7 +265,6 @@ def get_messages(room, message_num=0):
     data = []
 
     with DBConnection() as db:
-
         results = db.execute(query, (room,))
         row_headers = [x[0] for x in results.description]
 
