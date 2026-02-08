@@ -7,7 +7,6 @@ import backend as cb
 from auth import RegistrationError
 from backend import AuthError, NotAllowedError
 
-DEBUG = False
 
 api = f.Blueprint("api", __name__, url_prefix="/api")
 
@@ -17,7 +16,7 @@ def token_required(func):
 
     @wraps(func)
     def wrapper(**kwargs):
-        token = f.request.values.get("token")
+        token = f.request.json.get("token")
 
         if token is None:
             return missing_arg("token")
@@ -32,20 +31,12 @@ def token_required(func):
     return wrapper
 
 
-def get_methods():
-    if DEBUG:
-        return ["GET", "POST"]
-
-    return ["POST"]
-
-
 def get_kv(request, keys, optional=None):
     optional = optional or []
-    r = {}
+    r = request.json
 
     for key in keys:
-        r[key] = request.values.get(key)
-
+        r[key] = r.get(key)
         if key in optional:
             continue
         if r[key] is None:
@@ -62,7 +53,7 @@ def missing_arg(arg=None):
     return f.jsonify({"e": string}), 400
 
 
-@api.route("/get", methods=get_methods())
+@api.route("/get", methods=["POST"])
 @token_required
 def api_get(username):
 
@@ -81,7 +72,7 @@ def api_get(username):
     return f.jsonify(cb.get_messages(args["room"], latest))
 
 
-@api.route("/send", methods=get_methods())
+@api.route("/send", methods=["POST"])
 @token_required
 def api_send(username):
 
@@ -98,7 +89,7 @@ def api_send(username):
     return f.jsonify({"status": "ok"})
 
 
-@api.route("/rooms/<action>", methods=get_methods())
+@api.route("/rooms/<action>", methods=["POST"])
 @token_required
 def manage_rooms(username, action):
     try:
@@ -125,7 +116,7 @@ def manage_rooms(username, action):
             f.abort(404)
 
 
-@api.route("/user/<action>", methods=get_methods())
+@api.route("/user/<action>", methods=["POST"])
 def manage_user(action):
     try:
         args = get_kv(
@@ -145,7 +136,7 @@ def manage_user(action):
             try:
                 auth.register_user(args["username"], args["password"])
             except RegistrationError as e:
-                return f.jsonify({"e": e.message})
+                return f.jsonify({"e": e.message}), 400
             return f.jsonify({"status": "ok"})
         case "tokens":
             return f.jsonify(cb.list_tokens(args["username"]))
@@ -175,7 +166,7 @@ def manage_user(action):
             f.abort(404)
 
 
-@api.route("/token/<action>", methods=get_methods())
+@api.route("/token/<action>", methods=["POST"])
 @token_required
 def manage_token(username, action):
     try:

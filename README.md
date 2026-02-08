@@ -1,12 +1,12 @@
 # Message Jar
 
-A web app messaging application built with python and flask
+A messaging web application built with Python and Flask
 
 ![Message Jar logo](https://raw.githubusercontent.com/gavhu10/MessageJar/refs/heads/main/static/jar.svg)
 
 ## Installation
 
-First, install flask with `pip install Flask`, preferably in a virtual environment. Then, run `flask init` to create the database and secret key. Now you can start Message Jar! If you are developing or debugging, start flask with
+First, install flask with `pip install flask`, preferably in a virtual environment. Then, run `flask init` to create the database and secret key. Now you can start Message Jar! If you are developing or debugging, start flask with
 ```
 flask run --debug
 ```
@@ -25,23 +25,33 @@ Send the `/help` command to print this message. Use `/add my_friend` to add user
 
 ## API Specification
 
-On failure, the server returns an HTTP 4xx error with a JSON body `{"error": "Error message"}`.
+Each endpoint takes JSON POST data. On failure, the server returns an HTTP 4xx error with a JSON body `{"e": "Error message"}`. Endpoints that take tokens use the form
+```json
+{
+  "token": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+  // Other data
+}
+```
+whereas endpoints that use your username and password use the form 
+```json
+{
+  "username": "user",
+  "password": "pass123",
+  // Other data
+}
+```
 
 ### Create account
 
-This endpoint takes a username and password arguments. It should return `{"status": "ok"}`. Here is an example curl request:
+This endpoint, which is at `/api/user/new`, takes your username and password. It should return `{"status": "ok"}`. Here is an example curl request:
 
 ```bash
-curl -d "username=user&password=pass123" http://127.0.0.1:5000/api/user/new
+curl --json '{"username":"user", "password":"pass123"}' http://127.0.0.1:5000/api/user/new
 ```
 
 ### Verify account
 
-This is another username and password endpoint. It also should also return `{"status": "ok"}`
-
-```bash
-curl -d "username=user&password=pass123" http://127.0.0.1:5000/api/user/verify
-```
+This is another username and password endpoint. It should also return `{"status": "ok"}`. The endpoint is at `/api/user/verify` and accepts json data with a username and password field.
 
 ### Generate token
 
@@ -50,53 +60,53 @@ This generates a token if the given username and password are valid. It returns
 {"token": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"}
 ```
 
-This is an example curl command for it:
-```bash
-curl -d "username=user&password=pass123&name=test" http://127.0.0.1:5000/api/user/generate
-```
+The request should be posted to `/api/user/generate` and it too only uses a username and password field.
+
 
 ### List tokens
 
 This endpoint lists the tokens for the user so that they can use them or revoke them.  
-A request like this:
-
-```bash
-curl -d "username=user&password=pass123" http://127.0.0.1:5000/api/user/tokens
-```
-Should return something like this:
+It is a username and password endpoint, and requests with valid credentials sent to `/api/user/tokens` should return something like this:
 
 ```json
-[{"token":"”XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX","tokenname":"test"}]
+[
+  {
+    "token": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "tokenname": "test",
+  }
+]
 ```
 
 ### Verify token
 
-This endpoint verifies the token and returns the associated username:
+This endpoint verifies the token and returns the associated username. It is at `/api/token/username` and takes JSON with the field `token`.
 
-```bash
-curl -d "token=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" http://127.0.0.1:5000/api/token/username
-```
 
 One response could look like this:
 
 ```json
-{"username":"user"}
+{
+  "username": "user"
+}
 ```
 
 ### Create room
 
-This creates a room. The creator is automatically made the admin.
-It should return the `{"status": "ok"}` response.
-```bash
-curl -d "token=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX&room=test" http://127.0.0.1:5000/api/rooms/create
+This creates a room. The creator is automatically made the admin. JSON data like this
+```json
+{
+  "token": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+  "room": "my room"
+}
 ```
+POSTed to `/api/rooms/create` should return the `{"status": "ok"}` response.
 
 ### List rooms
 
-This lists the user’s rooms and returns them as a json list. Here is an example request and the appropriate response:
+This lists the user's rooms and returns them as a JSON list. Here is an example request and the appropriate response:
 
 ```bash
-curl -d "token=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" http://127.0.0.1:5000/api/rooms/list
+curl --json '{"token":"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"}' http://127.0.0.1:5000/api/rooms/list
 ```
 
 ```json
@@ -105,19 +115,29 @@ curl -d "token=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" http://127.0.0.1:500
 
 ### Send message
 
-This endpoint is simple: it adds a specified message to the specified room. A command like this one sends a message “testing123” to the “test” room from the user who owns the api token. If it succeeds, it returns `{"status": "ok"}`.
-```bash
-curl -d "token=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX&room=test&message=testing123" http://127.0.0.1:5000/api/send
+This endpoint, which is at `/api/send` is simple: it adds a specified message to the specified room. Something like this this sends a message “testing123” to the “test” room from the user who owns the api token. If it succeeds, it returns `{"status": "ok"}`.
+
+```json
+{
+  "token": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+  "room": "my room",
+  "message": "Hello World!",
+}
 ```
 
 
 ### Get messages
 
-This api endpoint is for getting messages. 
+This api endpoint is for getting messages and it is at `/api/get`.
 
-```bash
-curl -d "token=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX&room=test" http://127.0.0.1:5000/api/get
+
+```json
+{
+  "token": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+  "room": "my room",
+}
 ```
+
 It should return something like this if the room has just been made and a message has been sent. The times are in EST. (note: the server assumes it is running in a UTC timezone.)
 ```json
 [
@@ -138,18 +158,18 @@ It should return something like this if the room has just been made and a messag
 
 ### Revoke token
 
-This endpoint revokes the token used to make the request. To revoke a token that you do not have, you will have to have the username and password, and make a request from /api/user/tokens. It will return `{"status": "ok"}` on success.
-
-```bash
-curl -d "token=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" http://127.0.0.1:5000/api/token/revoke
-```
+This endpoint, which is at `/api/token/revoke`, revokes the token used to make the request. To revoke a token that you do not have, you will have to have the username and password, and make a request to `/api/user/tokens`. It will return `{"status": "ok"}` on success.
 
 ### Change password
 
-This endpoint is for changing the user’s password. It also returns `{"status": "ok"}` on success.
+This endpoint is for changing the user's password. It also returns `{"status": "ok"}` on success.
 
-```bash
-curl -d "username=user&password=pass123&newpass=long and much more secure password194827349!" http://127.0.0.1:5000/api/user/changepass
+```json
+{
+  "username": "user",
+  "password": "pass123",
+  "newpass": "long and much more secure password194827349!",
+}
 ```
 </details>
 
@@ -167,4 +187,4 @@ curl -d "username=user&password=pass123&newpass=long and much more secure passwo
 Credit:  
   
 Authentication and some database code from the [flaskr tutorial](https://github.com/pallets/flask/tree/3.1.2/examples/tutorial)  
-Some inspireation and ideas from [a chat room by ClaudiasLibrary](https://github.com/ClaudiasLibrary/chat_room) and [ntfy](https://ntfy.sh)
+Some inspiration and ideas from [a chat room by ClaudiasLibrary](https://github.com/ClaudiasLibrary/chat_room) and [ntfy](https://ntfy.sh)
