@@ -5,7 +5,6 @@ import subprocess
 import sys
 import time
 import unittest
-import urllib.parse
 import urllib.request
 
 # Configuration
@@ -85,18 +84,22 @@ class TestChatIntegration(unittest.TestCase):
                     pass
 
     def _post(self, endpoint, data_dict):
-        """Helper to perform POST request with form data and return JSON."""
+        """Helper to perform POST request with JSON data and return JSON."""
         url = f"{BASE_URL}{endpoint}"
-        # Convert dict to application/x-www-form-urlencoded
-        data = urllib.parse.urlencode(data_dict).encode("utf-8")
-        req = urllib.request.Request(url, data=data, method="POST")
+
+        # 1. Convert dict to JSON string and encode to bytes
+        data = json.dumps(data_dict).encode("utf-8")
+
+        # 2. Create request and explicitly set the Content-Type header
+        req = urllib.request.Request(
+            url, data=data, method="POST", headers={"Content-Type": "application/json"}
+        )
 
         try:
             with urllib.request.urlopen(req) as response:
                 response_body = response.read().decode("utf-8")
                 return json.loads(response_body)
         except urllib.error.HTTPError as e:
-            # If the server returns a 4xx/5xx with JSON error message, read it
             error_body = e.read().decode("utf-8")
             try:
                 return json.loads(error_body)
