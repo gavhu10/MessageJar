@@ -10,6 +10,31 @@ import db
 import jar
 import user
 
+SCHEMA_VERSION = 1
+
+
+@click.command("update")
+def update_db_command():
+    with db.DBConnection() as conn:
+        num = conn.execute("SELECT * FROM schema_version").fetchone()[0]
+    if num == SCHEMA_VERSION:
+        click.echo("Database schema at latest version.")
+    elif num < SCHEMA_VERSION:
+        click.echo("Updating database... ", nl=False)
+        with db.DBConnection() as conn:
+            # TODO: implement when needed
+            conn.execute(
+                "INSERT OR REPLACE INTO schema_version (num, enforcer) VALUES (?, 0);",
+                (SCHEMA_VERSION,),
+            )
+            conn.commit()
+        click.echo("Done!")
+    else:
+        click.echo(
+            f"Error updating! Expected version number to be <= {SCHEMA_VERSION} "
+            f"Got: {num}"
+        )
+
 
 @click.command("init")
 def init_db_command():
@@ -52,6 +77,7 @@ def create_app(test_config=None):
     db.init_app(app)
 
     app.cli.add_command(init_db_command)
+    app.cli.add_command(update_db_command)
 
     app.register_blueprint(auth.bp)
     app.register_blueprint(jar.jar)
