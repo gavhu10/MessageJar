@@ -7,7 +7,6 @@ import backend as cb
 from auth import RegistrationError
 from backend import AuthError, NotAllowedError
 
-
 api = f.Blueprint("api", __name__, url_prefix="/api")
 
 

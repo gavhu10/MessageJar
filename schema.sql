@@ -39,5 +39,12 @@ CREATE TABLE rooms (
   FOREIGN KEY (member) REFERENCES user (username)
 );
 
+CREATE TABLE schema_version (
+  num INT NOT NULL PRIMARY KEY, 
+  enforcer INT DEFAULT 0 NOT NULL CHECK(enforcer == 0), 
+  UNIQUE (enforcer)
+) WITHOUT ROWID;
+
 INSERT INTO user (username, password) VALUES ("Message Jar", "I am good at choosing passwords");
 INSERT INTO rooms (roomname, member) VALUES ("lobby", "Message Jar");
+INSERT OR REPLACE INTO schema_version (num, enforcer) VALUES (1, 0);
