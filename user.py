@@ -21,20 +21,24 @@ def pass_change():
     if f.request.method == "POST":
         old_password = f.request.form["old_password"]
         new_password = f.request.form["new_password"]
+        new_password_rep = f.request.form["new_password_rep"]
         error = None
 
         username = f.session["username"]
 
         if not new_password:
             error = "New password is required."
+        elif new_password != new_password_rep:
+            error = "Passwords must match."
 
-        try:
-            auth.change_password(username, old_password, new_password)
-            f.flash("Password successfully changed.")
-            f.current_app.logger.info(f"User {username} changed their password.")
-            return f.redirect(f.url_for("jar.index"))
-        except AuthError:
-            error = "Old password is incorrect."
+        if error is None:
+            try:
+                auth.change_password(username, old_password, new_password)
+                f.flash("Password successfully changed.")
+                f.current_app.logger.info(f"User {username} changed their password.")
+                return f.redirect(f.url_for("jar.index"))
+            except AuthError:
+                error = "Old password is incorrect."
 
         f.flash(error)
 
