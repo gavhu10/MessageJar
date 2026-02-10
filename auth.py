@@ -65,12 +65,15 @@ def register():
     if f.request.method == "POST":
         username = f.request.form["username"]
         password = f.request.form["password"]
+        password_rep = f.request.form["password_rep"]
         error = None
 
         if not username:
             error = "Username is required."
         elif not password:
             error = "Password is required."
+        elif password != password_rep:
+            error = "Passwords must match."
 
         if error is None:
             try:
