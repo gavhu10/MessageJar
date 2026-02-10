@@ -6,6 +6,8 @@ A messaging web application built with Python and Flask
 
 ## Installation
 
+You can access an online instance [here](https://messagejar.pythonanywhere.com)!
+
 First, install flask with `pip install flask`, preferably in a virtual environment. Then, run `flask init` to create the database and secret key. Now you can start Message Jar! If you are developing or debugging, start flask with
 ```
 flask run --debug
