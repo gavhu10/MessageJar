@@ -47,7 +47,7 @@ class TestChatIntegration(unittest.TestCase):
             env=env,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
-            start_new_session=True,
+        start_new_session=True,
         )
 
         timeout = 30
