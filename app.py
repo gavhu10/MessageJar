@@ -9,6 +9,7 @@ import auth
 import db
 import jar
 import user
+from limiter import limiter
 
 SCHEMA_VERSION = 1
 
@@ -83,6 +84,8 @@ def create_app(test_config=None):
     app.register_blueprint(jar.jar)
     app.register_blueprint(api.api)
     app.register_blueprint(user.user)
+
+    limiter.init_app(app)
 
     return app
 
