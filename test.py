@@ -36,6 +36,7 @@ class TestChatIntegration(unittest.TestCase):
         env["FLASK_APP"] = "app.py"
         env["FLASK_RUN_HOST"] = HOST
         env["FLASK_RUN_PORT"] = str(PORT)
+        env["FLASK_RATELIMIT_ENABLED"] = ""
 
         print("Initializing database...")
         subprocess.run([PYTHON_EXE, "-m", "flask", "init"], env=env, check=True)
@@ -47,7 +48,7 @@ class TestChatIntegration(unittest.TestCase):
             env=env,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
-        start_new_session=True,
+            start_new_session=True,
         )
 
         timeout = 30

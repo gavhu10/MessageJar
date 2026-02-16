@@ -47,7 +47,7 @@ def add_message(author, message, room, force=False):
 
     if not message:
         return
-    
+
     if not (force or room in get_rooms(author)):
         raise AuthError(f"User {author} is not a member of room {room}.")
 

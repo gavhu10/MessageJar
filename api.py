@@ -6,8 +6,10 @@ import auth
 import backend as cb
 from auth import RegistrationError
 from backend import AuthError, NotAllowedError
+from limiter import limiter
 
 api = f.Blueprint("api", __name__, url_prefix="/api")
+limiter.limit("2 per second", key_func=lambda: 1)(api)
 
 
 def token_required(func):
@@ -115,6 +117,7 @@ def manage_rooms(username, action):
             f.abort(404)
 
 
+@limiter.limit("1 per second")
 @api.route("/user/<action>", methods=["POST"])
 def manage_user(action):
     try:
