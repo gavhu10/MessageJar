@@ -8,7 +8,7 @@ from auth import RegistrationError
 from backend import AuthError, NotAllowedError
 from limiter import limiter
 
-api = f.Blueprint("api", __name__, url_prefix="/api")
+api = f.Blueprint("api", __name__, url_prefix="/api/v1")
 limiter.limit("2 per second", key_func=lambda: 1)(api)
 
 

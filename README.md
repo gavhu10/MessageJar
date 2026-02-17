@@ -47,15 +47,15 @@ whereas endpoints that use your username and password use the form
 
 ### Create account
 
-This endpoint, which is at `/api/user/new`, takes your username and password. It should return `{"status": "ok"}`. Here is an example curl request:
+This endpoint, which is at `/api/v1/user/new`, takes your username and password. It should return `{"status": "ok"}`. Here is an example curl request:
 
 ```bash
-curl --json '{"username":"user", "password":"pass123"}' http://127.0.0.1:5000/api/user/new
+curl --json '{"username":"user", "password":"pass123"}' http://127.0.0.1:5000/api/v1/user/new
 ```
 
 ### Verify account
 
-This is another username and password endpoint. It should also return `{"status": "ok"}`. The endpoint is at `/api/user/verify` and accepts json data with a username and password field.
+This is another username and password endpoint. It should also return `{"status": "ok"}`. The endpoint is at `/api/v1/user/verify` and accepts json data with a username and password field.
 
 ### Generate token
 
@@ -64,13 +64,13 @@ This generates a token if the given username and password are valid. It returns
 {"token": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"}
 ```
 
-The request should be posted to `/api/user/generate` and it too only uses a username and password field.
+The request should be posted to `/api/v1/user/generate` and it too only uses a username and password field.
 
 
 ### List tokens
 
 This endpoint lists the tokens for the user so that they can use them or revoke them.  
-It is a username and password endpoint, and requests with valid credentials sent to `/api/user/tokens` should return something like this:
+It is a username and password endpoint, and requests with valid credentials sent to `/api/v1/user/tokens` should return something like this:
 
 ```json
 [
@@ -83,7 +83,7 @@ It is a username and password endpoint, and requests with valid credentials sent
 
 ### Verify token
 
-This endpoint verifies the token and returns the associated username. It is at `/api/token/username` and takes JSON with the field `token`.
+This endpoint verifies the token and returns the associated username. It is at `/api/v1/token/username` and takes JSON with the field `token`.
 
 
 One response could look like this:
@@ -103,14 +103,14 @@ This creates a room. The creator is automatically made the admin. JSON data like
   "room": "my room"
 }
 ```
-POSTed to `/api/rooms/create` should return the `{"status": "ok"}` response.
+POSTed to `/api/v1/rooms/create` should return the `{"status": "ok"}` response.
 
 ### List rooms
 
 This lists the user's rooms and returns them as a JSON list. Here is an example request and the appropriate response:
 
 ```bash
-curl --json '{"token":"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"}' http://127.0.0.1:5000/api/rooms/list
+curl --json '{"token":"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"}' http://127.0.0.1:5000/api/v1/rooms/list
 ```
 
 ```json
@@ -119,7 +119,7 @@ curl --json '{"token":"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"}' http://127
 
 ### Send message
 
-This endpoint, which is at `/api/send` is simple: it adds a specified message to the specified room. Something like this this sends a message “testing123” to the “test” room from the user who owns the api token. If it succeeds, it returns `{"status": "ok"}`.
+This endpoint, which is at `/api/v1/send` is simple: it adds a specified message to the specified room. Something like this this sends a message “testing123” to the “test” room from the user who owns the api token. If it succeeds, it returns `{"status": "ok"}`.
 
 ```json
 {
@@ -132,7 +132,7 @@ This endpoint, which is at `/api/send` is simple: it adds a specified message to
 
 ### Get messages
 
-This api endpoint is for getting messages and it is at `/api/get`.
+This api endpoint is for getting messages and it is at `/api/v1/get`.
 
 
 ```json
@@ -162,7 +162,7 @@ It should return something like this if the room has just been made and a messag
 
 ### Revoke token
 
-This endpoint, which is at `/api/token/revoke`, revokes the token used to make the request. To revoke a token that you do not have, you will have to have the username and password, and make a request to `/api/user/tokens`. It will return `{"status": "ok"}` on success.
+This endpoint, which is at `/api/v1/token/revoke`, revokes the token used to make the request. To revoke a token that you do not have, you will have to have the username and password, and make a request to `/api/v1/user/tokens`. It will return `{"status": "ok"}` on success.
 
 ### Change password
 
