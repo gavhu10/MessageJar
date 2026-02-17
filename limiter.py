@@ -1,5 +1,9 @@
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from redislite import StrictRedis
+
+
+redis = StrictRedis("/dev/shm/cache.rdb")
 
 # From the docs:
 # https://flask-limiter.readthedocs.io/en/stable/configuration.html#rate-limit-string-notation
@@ -11,5 +15,5 @@ from flask_limiter.util import get_remote_address
 
 limiter = Limiter(
     get_remote_address,
-    storage_uri="memcached://localhost:11211",
+    storage_uri=f"redis+unix://{redis.socket_file}",
 )
