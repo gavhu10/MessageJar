@@ -1,0 +1,4 @@
+redis<5.0.0
+redislite<6.3.0
+Flask
+Flask-Limiter==4.1.1
