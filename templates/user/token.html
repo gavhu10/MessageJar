@@ -32,6 +32,7 @@ Here are your tokens:
 Create a new token here:
 <form action="{{ url_for('user.tokens') }}" method="post">
     <input type="text" name="token_name" placeholder="Token name" autocomplete="off" required>
+    <br><br>
     <input type="submit" value="Add Token">
 </form>
 {% endblock %}

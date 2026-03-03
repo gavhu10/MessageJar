@@ -7,11 +7,12 @@
 {% block content %}
 <form method="post">
   <label for="username">Username</label>
-  <input name="username" id="username" required>
+  <input name="username" type="text" id="username" required>
   <br><label for="password">Password</label>*Note: your account cannot be recovered if you forget your password!
   <input type="password" name="password" id="password" required>
   Retype password:
   <input name="password_rep" id="password_rep" type="password" required>
+  <br><br>
   <input type="submit" value="Register">
 </form>
 {% endblock %}
