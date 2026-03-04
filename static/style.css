@@ -102,7 +102,6 @@ h1, h2, h3 {
   background: #fff;
   border: 1px solid #e0e0e0;
   padding: 8px 12px;
-  max-width: 90%;
   margin-bottom: 8px !important; /* not sure why margin-bottom is ignored without !important */
 }
 

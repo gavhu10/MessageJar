@@ -2,7 +2,6 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from redislite import StrictRedis
 
-
 redis = StrictRedis("/dev/shm/cache.rdb")
 
 # From the docs:
