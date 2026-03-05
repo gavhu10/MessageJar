@@ -19,7 +19,7 @@ def index():
 
     error = None
 
-    room_name = f.request.form.get("room_name")
+    room_name = f.request.form.get("room_name").replace("/", "")
 
     if not room_name:
         error = "Room name is required!"
@@ -66,5 +66,6 @@ def endpoint(room_name):
 
         content = f.request.form["message"]
         cb.add_message(str(f.g.user["username"]), content, room_name)
-        return "ok"
+        return f.jsonify({"status": "ok"})
+    
     f.abort(404)
