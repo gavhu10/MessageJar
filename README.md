@@ -45,6 +45,10 @@ whereas endpoints that use your username and password use the form
 }
 ```
 
+### Test username
+
+This enpoint is at `/api/v1/user/exists` has a single parameter named username. It checks if the username is valid. This is so that applications can tell if they can log in or if they need to create an account.
+
 ### Create account
 
 This endpoint, which is at `/api/v1/user/new`, takes your username and password. It should return `{"status": "ok"}`. Here is an example curl request:

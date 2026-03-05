@@ -9,7 +9,7 @@ from backend import AuthError, NotAllowedError
 from limiter import limiter
 
 api = f.Blueprint("api", __name__, url_prefix="/api/v1")
-limiter.limit("2 per second", key_func=lambda: 1)(api)
+limiter.limit("2 per second")(api)
 
 
 def token_required(func):
@@ -127,13 +127,15 @@ def manage_user(action):
     except ValueError:
         return missing_arg()
 
-    if action != "new":
+    if action not in ["new", "exists"]:
         try:
             auth.check_user(args["username"], args["password"])
         except AuthError as e:
             return f.jsonify({"e": e.message})
 
     match action:
+        case "exists":
+            return f.jsonify(cb.user_exists(args["username"]))
         case "new":
             try:
                 auth.register_user(args["username"], args["password"])
