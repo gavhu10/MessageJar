@@ -207,3 +207,11 @@ button:hover,
   background: #f5f5f5;
   color: var(--primary);
 }
+
+.flash {
+  margin: 1em 0;
+  padding: 1em;
+  background: #cae6f6;
+  border: 2px solid #47bbff;
+  border-radius: 5px;
+}
