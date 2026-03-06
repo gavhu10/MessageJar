@@ -2,6 +2,8 @@
 
 A messaging web application built with Python and Flask
 
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 ![Message Jar logo](https://raw.githubusercontent.com/gavhu10/MessageJar/refs/heads/main/static/jar.svg)
 
 ## Installation
@@ -183,16 +185,10 @@ This endpoint is for changing the user's password. It also returns `{"status": "
 
 
 
-## Todo  
 
- - [x] better css
- - [x] multiple rooms
- - [ ] create client for [cardputer](https://github.com/terremoth/awesome-m5stack-cardputer)
- - [x] optimize for mobile use
 
- [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-Credit:  
+## Credit
   
 Authentication and some database code from the [flaskr tutorial](https://github.com/pallets/flask/tree/3.1.2/examples/tutorial)  
 Some inspiration and ideas from [a chat room by ClaudiasLibrary](https://github.com/ClaudiasLibrary/chat_room) and [ntfy](https://ntfy.sh)
