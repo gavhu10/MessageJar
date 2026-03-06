@@ -6,10 +6,8 @@ import flask as f
 
 class DBConnection:
     """
-    Class-based context manager for a sqlite3.Connection tied to the Flask
-    application context. Reuses a connection stored on flask.g if present.
-    The connection is closed and removed from flask.g only if this instance
-    created it.
+    Class-based context manager for a sqlite3.Connection to the database defined
+    in the Flask config
     Usage:
         with DBConnection() as db:
             db.execute(...)
@@ -20,25 +18,17 @@ class DBConnection:
         self._created_here = False
 
     def __enter__(self):
-        if "db" not in f.g:
-            self.conn = sqlite3.connect(
-                f.current_app.config["DATABASE"], detect_types=sqlite3.PARSE_DECLTYPES
-            )
-            self.conn.row_factory = sqlite3.Row
-            f.g.db = self.conn
-            self._created_here = True
-        else:
-            self.conn = f.g.db
-            self._created_here = False
+        self.conn = sqlite3.connect(
+            f.current_app.config["DATABASE"], detect_types=sqlite3.PARSE_DECLTYPES
+        )
+        self.conn.row_factory = sqlite3.Row
         return self.conn
 
     def __exit__(self, exc_type, exc, tb):
-        if self._created_here:
-            f.g.pop("db", None)
-            try:
-                self.conn.close()
-            except Exception:
-                pass
+        try:
+            self.conn.close()
+        except Exception:
+            pass
         return False
 
 
