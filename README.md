@@ -18,11 +18,20 @@ flask run --debug
 
 Otherwise, use one of the options detailed by the flask documentation [here](https://flask.palletsprojects.com/en/stable/deploying/).
 
+If your database no longer has the right schema, run `flask update`. It will not modify anything if you are up to date.
+
 ## Slash commands
 
 Slash commands are how you manage your rooms (or jars). To use them, send them like a normal message.
 
 Send the `/help` command to print this message. Use `/add my_friend` to add user "my_friend". The `/remove` command is remarkable similar, although it accomplishes the inverse operation. To use it, send the message `/remove not_my_friend` to remove the user "not_my_friend". You can leave a room by sending the `/leave` command, although if you created the room, you will have to delete the room instead. This is done by sending the `/delete` command. (you will have to reload to see the effects.) But be careful: there is no recovering lost rooms.
+
+
+## Invite links
+
+To create an invite link, click on your username to access your user settings. Then navigate to “Your invite links”. There you can create a link for any of the rooms you are a part of, including a small message to remind yourself who and what the link is for. Then hit "Create Invite Link"! You can get the link for further use by right-clicking the message you put in and selecting “Copy Link”.
+
+If you want to use an invite link, just click it. It will add you to the proper room.
 
 
 <details>
@@ -109,7 +118,7 @@ This creates a room. The creator is automatically made the admin. JSON data like
   "room": "my room"
 }
 ```
-POSTed to `/api/v1/rooms/create` should return the `{"status": "ok"}` response.
+POSTed to `/api/v1/rooms/create` should return the `{"status": "ok"}` response. Add other people to talk to with the slash commands. (see above)
 
 ### List rooms
 
@@ -122,6 +131,31 @@ curl --json '{"token":"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"}' http://127
 ```json
 ["lobby","test"]
 ```
+
+## Create invite
+
+The api does not deal with invite links, but instead tokens, which is the the part after `/i?token=` in an invite link. To create an invite token, use the `/api/v1/rooms/create_invite`. You need to send along your access token and a usage message under the name `"invite_message"` and if all goes well it responds with something like this:
+
+```json
+{
+  "token": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+}
+```
+
+
+## Accept invite
+
+If you want to accept an invite use the `/api/v1/rooms/join` endpoint. Send your access token and your invite token like so:
+
+```json
+{
+  "token": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+  "invite_token": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+}
+```
+
+The server will put you into the proper jar and return the room under the (aptly named) "room" json key.
+
 
 ### Send message
 

@@ -23,6 +23,7 @@ class TestChatIntegration(unittest.TestCase):
     server_process = None
     token1 = None
     token2 = None
+    invite_token = None
 
     @classmethod
     def setUpClass(cls):
@@ -36,10 +37,12 @@ class TestChatIntegration(unittest.TestCase):
         env["FLASK_APP"] = "app.py"
         env["FLASK_RUN_HOST"] = HOST
         env["FLASK_RUN_PORT"] = str(PORT)
-        env["FLASK_RATELIMIT_ENABLED"] = ""
 
         print("Initializing database...")
         subprocess.run([PYTHON_EXE, "-m", "flask", "init"], env=env, check=True)
+
+        with open("instance/config.py", "w") as f:
+            f.write("RATELIMIT_ENABLED = False")
 
         print("Starting Flask server...")
 
@@ -248,17 +251,33 @@ class TestChatIntegration(unittest.TestCase):
         resp = self._post("/api/v1/rooms/list", {"token": self.__class__.token2})
         self.assertNotIn("test", resp, "Remove command failed")
 
-    def test_16_leave_room(self):
+    def test_16_create_invite(self):
         resp = self._post(
-            "/api/v1/send",
+            "/api/v1/rooms/create_invite",
             {
                 "token": self.__class__.token1,
+                "invite_message": "test link",
                 "room": "test",
-                "message": f"/add {U2}",
             },
         )
-        self.assertEqual(resp, {"status": "ok"}, "send /add message failed")
+        self.__class__.invite_token = resp.get("token")
 
+        self.assertNotEqual(self.invite_token, None, "Generate invite token failed!")
+
+
+    def test_17_accept_invite(self):
+        resp = self._post(
+            "/api/v1/rooms/join",
+            {
+                "token": self.__class__.token2,
+                "invite_token": self.__class__.invite_token,
+            },
+        )
+        self.assertEqual(resp.get("room"), "test", "Join room failed")
+        resp = self._post("/api/v1/rooms/list", {"token": self.__class__.token2})
+        self.assertIn("test", resp, "Joined room not in room list")
+
+    def test_18_leave_room(self):
         resp = self._post(
             "/api/v1/send",
             {
@@ -272,7 +291,7 @@ class TestChatIntegration(unittest.TestCase):
         resp = self._post("/api/v1/rooms/list", {"token": self.__class__.token2})
         self.assertNotIn("test", resp, "Leave failed")
 
-    def test_17_delete_room(self):
+    def test_19_delete_room(self):
 
         resp = self._post(
             "/api/v1/send",
@@ -287,7 +306,7 @@ class TestChatIntegration(unittest.TestCase):
         resp = self._post("/api/v1/rooms/list", {"token": self.__class__.token1})
         self.assertNotIn("test", resp, "Leave failed")
 
-    def test_18_test_enter_wrong_room(self):
+    def test_20_test_enter_wrong_room(self):
         resp = self._post(
             "/api/v1/get", {"token": self.__class__.token2, "room": "test"}
         )
@@ -300,23 +319,23 @@ class TestChatIntegration(unittest.TestCase):
 
         self.assertNotEqual(resp.get("e"), None, "entering deleted room possible")
 
-    def test_19_revoke_token(self):
+    def test_21_revoke_token(self):
         resp = self._post("/api/v1/token/revoke", {"token": self.__class__.token1})
         self.assertEqual(resp, {"status": "ok"}, "revoke token failed")
 
-    def test_20_change_password(self):
+    def test_22_change_password(self):
         resp = self._post(
             "/api/v1/user/changepass",
             {"username": U1, "password": P1, "newpass": "r"},
         )
         self.assertEqual(resp, {"status": "ok"}, "change password failed")
 
-    def test_21_check_change_password(self):
+    def test_23_check_change_password(self):
         resp = self._post("/api/v1/user/verify", {"username": U1, "password": P1})
 
         self.assertNotEqual(resp.get("e"), None, "change password failed")
 
-    def test_22_check_exists(self):
+    def test_24_check_exists(self):
         self.assertTrue(self._post("/api/v1/user/exists", {"username": U1}))
 
 

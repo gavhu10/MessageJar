@@ -132,6 +132,7 @@ h1, h2, h3 {
 
 .content input[type="text"],
 .content input[type="password"],
+.content select,
 .content textarea {
   width: 100%;
   padding: .6rem;
@@ -140,6 +141,8 @@ h1, h2, h3 {
   background: #fff;
   font-size: .95rem;
   transition: border-color .1s;
+  height: auto;
+  display: block;
 }
 
 .content input:focus {

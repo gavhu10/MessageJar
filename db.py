@@ -1,3 +1,4 @@
+import click
 import sqlite3
 from datetime import datetime
 
@@ -59,3 +60,34 @@ def init_app(app):
     the application factory.
     """
     app.teardown_appcontext(__close_db)
+
+
+def update_db(version):
+    with DBConnection() as conn:
+        num = conn.execute("SELECT * FROM schema_version").fetchone()[0]
+    if num == version:
+        click.echo("Database schema at latest version.")
+    elif num < version:
+        click.echo("Updating database... ", nl=False)
+        with DBConnection() as conn:
+            if num == 1:  # only version so far
+                conn.execute(
+                    "CREATE TABLE invitelinks ("
+                    "token TEXT PRIMARY KEY,"
+                    "username TEXT NOT NULL,"
+                    "invite_name TEXT NOT NULL,"
+                    "room TEXT NOT NULL,"
+                    "created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,"
+                    "FOREIGN KEY (username) REFERENCES user (username) ON DELETE CASCADE"
+                    ");"
+                )
+            conn.execute(
+                "INSERT OR REPLACE INTO schema_version (num, enforcer) VALUES (?, 0);",
+                (version,),
+            )
+            conn.commit()
+        click.echo("Done!")
+    else:
+        click.echo(
+            f"Error updating! Expected version number to be <= {version} " f"Got: {num}"
+        )
