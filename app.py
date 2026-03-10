@@ -11,30 +11,12 @@ import jar
 import user
 from limiter import limiter
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 
 @click.command("update")
 def update_db_command():
-    with db.DBConnection() as conn:
-        num = conn.execute("SELECT * FROM schema_version").fetchone()[0]
-    if num == SCHEMA_VERSION:
-        click.echo("Database schema at latest version.")
-    elif num < SCHEMA_VERSION:
-        click.echo("Updating database... ", nl=False)
-        with db.DBConnection() as conn:
-            # TODO: implement when needed
-            conn.execute(
-                "INSERT OR REPLACE INTO schema_version (num, enforcer) VALUES (?, 0);",
-                (SCHEMA_VERSION,),
-            )
-            conn.commit()
-        click.echo("Done!")
-    else:
-        click.echo(
-            f"Error updating! Expected version number to be <= {SCHEMA_VERSION} "
-            f"Got: {num}"
-        )
+    db.update_db(SCHEMA_VERSION)
 
 
 @click.command("init")
@@ -74,6 +56,8 @@ def create_app(test_config=None):
     @app.route("/")
     def main():
         return f.render_template("main.html")
+
+    app.add_url_rule("/i", view_func=user.invite)
 
     db.init_app(app)
 

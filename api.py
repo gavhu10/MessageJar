@@ -7,6 +7,7 @@ import backend as cb
 from auth import RegistrationError
 from backend import AuthError, NotAllowedError
 from limiter import limiter
+import user
 
 api = f.Blueprint("api", __name__, url_prefix="/api/v1")
 limiter.limit("2 per second")(api)
@@ -94,7 +95,11 @@ def api_send(username):
 @token_required
 def manage_rooms(username, action):
     try:
-        args = get_kv(f.request, ["room"], ["room"])
+        args = get_kv(
+            f.request,
+            ["room", "invite_message", "invite_token"],
+            ["room", "invite_message", "invite_token"],
+        )
     except ValueError:
         return missing_arg("room")
 
@@ -113,6 +118,30 @@ def manage_rooms(username, action):
                     )
                 return f.jsonify({"status": "ok"})
             return missing_arg("room")
+        case "create_invite":
+            if not args["room"]:
+                return missing_arg("room")
+            if not args["invite_message"]:
+                return missing_arg("invite_message")
+            try:
+                invite_token = user.create_invite(
+                    username, args["room"], args["invite_message"]
+                )
+            except user.InviteError as e:
+                return f.jsonify({"e": e.message})
+            return f.jsonify({"token": invite_token})
+        case "join":
+            if not args["invite_token"]:
+                return missing_arg("invite_token")
+            try:
+                room, link_owner = user.invite_details(args["invite_token"])
+                if room not in cb.get_rooms(username):
+                    cb.add_to_room(room, username)
+                    cb.notify(f"User {username} added to room by {link_owner}", room)
+                return f.jsonify({"room": room})
+            except user.InviteError as e:
+                return f.jsonify({"e": e.message})
+
         case _:
             f.abort(404)
 

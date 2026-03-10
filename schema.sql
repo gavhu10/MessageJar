@@ -5,6 +5,7 @@ DROP TABLE IF EXISTS user;
 DROP TABLE IF EXISTS messages;
 DROP TABLE IF EXISTS rooms;
 DROP TABLE IF EXISTS apitokens;
+DROP TABLE IF EXISTS invitelinks;
 DROP TABLE IF EXISTS schema_version;
 
 CREATE TABLE user (
@@ -33,6 +34,16 @@ CREATE TABLE apitokens (
   FOREIGN KEY (username) REFERENCES user (username) ON DELETE CASCADE
 );
 
+CREATE TABLE invitelinks (
+  token TEXT PRIMARY KEY,
+  username TEXT NOT NULL,
+  invite_name TEXT NOT NULL,
+  room TEXT NOT NULL,
+  created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (username) REFERENCES user (username) ON DELETE CASCADE
+);
+
+
 CREATE TABLE rooms (
   roomname TEXT NOT NULL,
   member TEXT NOT NULL,
@@ -48,4 +59,4 @@ CREATE TABLE schema_version (
 
 INSERT INTO user (username, password) VALUES ("Message Jar", "I am good at choosing passwords");
 INSERT INTO rooms (roomname, member) VALUES ("lobby", "Message Jar");
-INSERT OR REPLACE INTO schema_version (num, enforcer) VALUES (1, 0);
+INSERT OR REPLACE INTO schema_version (num, enforcer) VALUES (2, 0);
