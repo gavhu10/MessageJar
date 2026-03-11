@@ -67,5 +67,5 @@ def endpoint(room_name):
         content = f.request.form["message"]
         cb.add_message(str(f.g.user["username"]), content, room_name)
         return f.jsonify({"status": "ok"})
-    
+
     f.abort(404)
