@@ -33,6 +33,7 @@ def login_required(view):
     @functools.wraps(view)
     def wrapped_view(**kwargs):
         if f.g.user is None:
+            f.flash("Please log in to continue.")
             return f.redirect(f.url_for("auth.login"))
 
         return view(**kwargs)
@@ -113,7 +114,7 @@ def login():
 def logout():
     """Clear the current session, including the stored user id."""
     f.session.clear()
-    return f.redirect(f.url_for("jar.index"))
+    return f.redirect(f.url_for("jar.login"))
 
 
 def register_user(username, password):
