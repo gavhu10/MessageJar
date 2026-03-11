@@ -12,6 +12,10 @@
   --text-main: #222;
   --text-muted: #555;
   --border-color: #000;
+
+  .jar-icon {
+      color: var(--text-main)
+    }
 }
 
 
@@ -30,7 +34,16 @@
     --border-color: #30363D;
     --flash-background: #001f31;
     --flash-border: #0274b6;
+
+    .jar-icon {
+      color: var(--text-main)
+    }
   }
+}
+
+.jar-icon {
+  vertical-align: middle;
+  margin-right: 10px;
 }
 
 * {
