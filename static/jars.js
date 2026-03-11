@@ -27,6 +27,22 @@
         scrollToBottom();
     }
 
+    function localizeTimestamps(posts) {
+        return posts.map(post => {
+            // Create a Date object from the UTC string
+            const date = new Date(post.created);
+
+            return {
+                ...post,
+                // Convert to a readable local format
+                created: date.toLocaleString(undefined, {
+                    dateStyle: 'medium',
+                    timeStyle: 'short'
+                })
+            };
+        });
+    }
+
     function updateLastSeenFrom(allMessages) {
         if (!Array.isArray(allMessages) || allMessages.length === 0) return;
         // backend returns messages with id reassigned to 0..N-1, so use the max id
@@ -54,16 +70,18 @@
 
             notifyPing();
 
+            const messages = localizeTimestamps(all)
+
             // On first load, render everything
             if (window.lastSeenId === 0) {
-                renderMessages(all);
-                updateLastSeenFrom(all);
+                renderMessages(messages);
+                updateLastSeenFrom(messages);
                 return;
             }
 
             // Render only new messages (renderMessages will skip already-seen using id)
-            renderMessages(all);
-            updateLastSeenFrom(all);
+            renderMessages(messages);
+            updateLastSeenFrom(messages);
         }).catch(function (err) {
             console.error('Failed to fetch messages:', err);
         });

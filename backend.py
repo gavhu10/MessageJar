@@ -147,13 +147,6 @@ def add_message(author, message, room, force=False):
                 pass
 
 
-# Note: you may need to cripple this funcion if you already are in the EST timezone
-def to_est(time):
-    """Convert a datetime.datetime object to GMT time string."""
-    r = time.astimezone(ZoneInfo("America/New_York"))
-    return str(r)[:-6]
-
-
 def delete_room(user, room):
     """Delete a room and its messages from the database."""
     if not is_admin(user, room):
@@ -252,7 +245,7 @@ def is_admin(user, room):
     return bool(r and r["isadmin"] == 1)
 
 
-def get_messages(room, message_num=0):
+def get_messages(room, latest=0):
     """Get all the messages from a room and return them as a list.
     Use flask.jsonify(get_messages()) to return this as a page
     """
@@ -278,22 +271,20 @@ def get_messages(room, message_num=0):
 
     data.sort(key=lambda x: x["id"])
 
-    for i in data:
-        i["created"] = to_est(i["created"])
-
     if room == "lobby" and len(data) > 0:
-        time = datetime.strptime(data[0]["created"], "%Y-%m-%d %H:%M:%S").replace(
-            tzinfo=ZoneInfo("America/New_York")
-        )
+        time = data[0]["created"].replace(tzinfo=ZoneInfo("UTC"))
         now = datetime.now(ZoneInfo("UTC"))
-        now = datetime.now(ZoneInfo("America/New_York"))
+        print(now.isoformat()[:-6] + "Z")
         difference = now - time
         if difference.total_seconds() > 86400:  # 24 hours in seconds
             clear_room("lobby")
             f.current_app.logger.info("Cleared lobby.")
             return []
 
-    return data[message_num:]
+    for i in data[latest:]:
+        i["created"] = i["created"].isoformat() + "Z"  # Z is for the js
+
+    return data[latest:]
 
 
 def list_tokens(user):

@@ -264,7 +264,6 @@ class TestChatIntegration(unittest.TestCase):
 
         self.assertNotEqual(self.invite_token, None, "Generate invite token failed!")
 
-
     def test_17_accept_invite(self):
         resp = self._post(
             "/api/v1/rooms/join",
