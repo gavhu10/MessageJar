@@ -15,9 +15,23 @@ Here are your tokens:
     {% for i in token_list %}
     <div class="token">
 
-        <div>
-            {{ i["tokenname"] }} - {{ i["token"]}}
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span>{{ i["tokenname"] }}</span>
+            <button id="copyBtn" datatoken="{{ i['token'] }}" class="icon-button" style="padding: 4px;"
+                onclick="copyToken(this)">Copy
+                Token</button>
         </div>
+
+        <script>
+            function copyToken(btn) {
+                navigator.clipboard.writeText(btn.datatoken).then(() => {
+                    // Visual feedback
+                    const originalText = btn.innerText;
+                    btn.innerText = "Copied!";
+                    setTimeout(() => btn.innerText = originalText, 2000);
+                }).catch(err => console.error("Failed to copy: ", err));
+            }
+        </script>
 
         <form action="{{ url_for('user.rmtoken') }}" method="POST" style="margin: 0;">
             <input type="hidden" name="token" value="{{ i['token'] }}">
