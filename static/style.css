@@ -12,12 +12,7 @@
   --text-main: #222;
   --text-muted: #555;
   --border-color: #000;
-
-  .jar-icon {
-    color: var(--text-main)
-  }
 }
-
 
 @media (prefers-color-scheme: dark) {
   :root {
@@ -34,16 +29,13 @@
     --border-color: #30363D;
     --flash-background: #001f31;
     --flash-border: #0274b6;
-
-    .jar-icon {
-      color: var(--text-main)
-    }
   }
 }
 
 .jar-icon {
+  color: var(--text-main);
   vertical-align: middle;
-  margin-right: 10px;
+  margin-right: 0px;
 }
 
 * {
@@ -101,6 +93,8 @@ nav {
   padding-bottom: 1rem;
   margin-bottom: 1.5rem;
   border-bottom: 1px solid var(--border-color);
+  gap: 1rem;
+  /* Added gap for cleaner spacing */
 }
 
 nav h1 {
@@ -112,6 +106,9 @@ nav h1 {
 nav h1 button.link-button,
 nav h1 a {
   font-weight: 700;
+  align-items: center;
+  line-height: 1;
+  display: flex;
 }
 
 nav ul {
@@ -129,6 +126,7 @@ nav ul li span {
   font-size: .9rem;
   padding: .4rem .6rem;
   color: var(--text-main);
+  border-radius: 3px;
 }
 
 nav ul li button.link-button:hover,
@@ -173,7 +171,6 @@ h3 {
   border: 1px solid var(--message-border);
   padding: 8px 12px;
   margin-bottom: 8px !important;
-  /* not sure why margin-bottom is ignored without !important */
 }
 
 .message .ts {
@@ -210,16 +207,20 @@ h3 {
   width: 100%;
   padding: .6rem;
   border: 1px solid var(--border-color);
-  border-radius: 2px;
+  border-radius: 4px;
+  /* Slightly larger radius for inputs */
   background: var(--bg-white);
   color: var(--text-main);
-  font-size: .95rem;
+  font-size: 1rem;
+  /* Prevent iOS auto-zoom on focus by keeping font-size at 16px (1rem) minimum */
   transition: border-color .1s;
   height: auto;
   display: block;
 }
 
-.content input:focus {
+.content input:focus,
+.content select:focus,
+.content textarea:focus {
   outline: none;
   border-color: var(--primary);
 }
@@ -232,7 +233,7 @@ button,
   color: var(--bg-white);
   border: none;
   padding: .6rem 1.2rem;
-  border-radius: 2px;
+  border-radius: 4px;
   font-weight: 600;
   font-size: .9rem;
   cursor: pointer;
@@ -260,13 +261,10 @@ button:hover,
   border: 1px solid var(--message-border);
   padding: .5rem;
   width: fit-content;
-  display: flex;
-  align-items: center;
-  gap: 15px;
   margin-bottom: 10px;
 }
 
-/* Ensure the icon button doesn't have extra line-height issues */
+/* Icon Buttons */
 .icon-button {
   display: flex;
   align-items: center;
@@ -275,21 +273,8 @@ button:hover,
   border: none;
   background: none;
   cursor: pointer;
-  border: none;
-  background: none;
-  cursor: pointer;
   color: var(--text-main);
 }
-
-/* Responsive */
-@media (max-width: 600px) {
-  body {
-    margin: 0;
-    border: none;
-    padding: 1rem;
-  }
-}
-
 
 /* Rooms */
 #room-links a {
@@ -310,4 +295,62 @@ button:hover,
   background: var(--flash-background);
   border: 2px solid var(--flash-border);
   border-radius: 5px;
+}
+
+/* Responsive Overrides */
+@media (max-width: 600px) {
+
+
+  body {
+    margin: 0;
+    border: none;
+    padding: 1rem 0.5rem;
+    /* Slight side padding to prevent text from hugging the screen edge */
+  }
+
+  /* Stack navigation components for smaller screens */
+  nav {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  nav h1 {
+    size: 1rem;
+  }
+
+  /* Allow nav links to wrap onto multiple lines if necessary */
+  nav ul {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  /* Better height for chat window on mobile */
+  #container {
+    height: 60vh;
+  }
+
+  /* Mobile devices lack 'hover'. Ensure timestamps are always visible but unobtrusive */
+  .message {
+    padding-bottom: 22px;
+  }
+
+  .message .ts {
+    display: block;
+    top: auto;
+    bottom: 4px;
+    right: 8px;
+    transform: none;
+    background: transparent;
+    color: var(--text-muted);
+  }
+
+  .content input[type="text"],
+  .content input[type="password"],
+  .content select,
+  .content textarea,
+  input[type=submit],
+  button,
+  #toTheBottom {
+    padding: 0.8rem;
+  }
 }
