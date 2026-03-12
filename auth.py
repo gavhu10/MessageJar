@@ -114,7 +114,7 @@ def login():
 def logout():
     """Clear the current session, including the stored user id."""
     f.session.clear()
-    return f.redirect(f.url_for("jar.login"))
+    return f.redirect(f.url_for("auth.login"))
 
 
 def register_user(username, password):
