@@ -58,5 +58,4 @@ CREATE TABLE schema_version (
 ) WITHOUT ROWID;
 
 INSERT INTO user (username, password) VALUES ("Message Jar", "I am good at choosing passwords");
-INSERT INTO rooms (roomname, member) VALUES ("lobby", "Message Jar");
-INSERT OR REPLACE INTO schema_version (num, enforcer) VALUES (2, 0);
+INSERT OR REPLACE INTO schema_version (num, enforcer) VALUES (3, 0);

@@ -11,7 +11,7 @@ import jar
 import user
 from limiter import limiter
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 
 @click.command("update")
@@ -25,6 +25,7 @@ def init_db_command():
     db.init_db()
     click.echo("Initialized the database.")
     auth.init_auth()
+
 
 def create_app(test_config=None):
     """Create and configure an instance of the Flask application."""
