@@ -56,12 +56,12 @@ def pass_change():
     return f.render_template("user/pass_change.html")
 
 
-@user.route("/rmtoken")
+@user.route("/rmtoken", methods=["POST"])
 @auth.login_required
 def rmtoken():
     message = None
 
-    token = f.request.args.get("token")
+    token = f.request.form.get("token")
 
     if token is None:
         message = "Token is required!"
@@ -181,12 +181,12 @@ def invite_details(token):
     return r[0]
 
 
-@user.route("/rmlink")
+@user.route("/rmlink", methods=["POST"])
 @auth.login_required
 def rmlink():
     message = None
 
-    link = f.request.args.get("link")
+    link = f.request.form.get("link")
 
     if link is None:
         message = "Link is required!"

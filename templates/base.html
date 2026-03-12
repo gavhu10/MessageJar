@@ -24,7 +24,11 @@
   <ul>
     {% if g.user %}
     <li><a href="{{ url_for('user.index') }}">{{ g.user['username'] }}</a>
-    <li><a href="{{ url_for('auth.logout') }}">Log Out</a>
+      <form action="{{ url_for('auth.logout') }}" method="POST" style="display: inline;">
+        <button type="submit" class="link-button">
+          Log Out
+        </button>
+      </form>
       {% else %}
     <li><a href="{{ url_for('auth.register') }}">Register</a>
     <li><a href="{{ url_for('auth.login') }}">Log In</a>
