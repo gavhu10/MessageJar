@@ -79,7 +79,15 @@ def add_message(author, message, room, force=False):
                         f'User "{author}" is not an admin and cannot delete the room.',
                         room,
                     )
-
+            case "clear":  # delete room
+                if is_admin(author, room):
+                    clear_room(room)
+                    notify(f'Room cleared by admin "{author}".', room)
+                else:
+                    notify(
+                        f'User "{author}" is not an admin and cannot clear the room.',
+                        room,
+                    )
             case "leave":  # leave room
                 if is_admin(author, room):
                     notify(
