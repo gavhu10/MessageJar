@@ -247,7 +247,7 @@ def invite():
         if room not in cb.get_rooms(f.g.user["username"]):
             cb.add_to_room(room, f.g.user["username"])
             cb.notify(
-                f"User {f.g.user["username"]} added to room by {link_owner}", room
+                f"User {f.g.user['username']} added to room by {link_owner}", room
             )
 
     except InviteError as e:
