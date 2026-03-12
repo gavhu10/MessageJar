@@ -14,8 +14,8 @@
   --border-color: #000;
 
   .jar-icon {
-      color: var(--text-main)
-    }
+    color: var(--text-main)
+  }
 }
 
 
@@ -69,12 +69,27 @@ body {
 }
 
 /* Links */
+.link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  cursor: pointer;
+  outline: inherit;
+  display: inline-block;
+  line-height: inherit;
+  vertical-align: baseline;
+}
+
+button.link-button,
 a {
   color: var(--primary);
   text-decoration: none;
   transition: color .1s;
 }
 
+button.link-button:hover,
 a:hover {
   color: var(--primary-hover);
 }
@@ -94,6 +109,7 @@ nav h1 {
   font-size: 2rem;
 }
 
+nav h1 button.link-button,
 nav h1 a {
   font-weight: 700;
 }
@@ -106,6 +122,7 @@ nav ul {
   gap: 1rem;
 }
 
+nav ul li button.link-button,
 nav ul li a,
 nav ul li span {
   font-weight: 600;
@@ -114,6 +131,7 @@ nav ul li span {
   color: var(--text-main);
 }
 
+nav ul li button.link-button:hover,
 nav ul li a:hover {
   background: var(--secondary-hover);
   color: var(--primary);
@@ -233,7 +251,7 @@ button:hover,
 }
 
 /* Tokens */
-#tokens p {
+#tokens .token {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -242,6 +260,25 @@ button:hover,
   border: 1px solid var(--message-border);
   padding: .5rem;
   width: fit-content;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+/* Ensure the icon button doesn't have extra line-height issues */
+.icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--text-main);
 }
 
 /* Responsive */
