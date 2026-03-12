@@ -281,16 +281,6 @@ def get_messages(room, latest=0):
 
     data.sort(key=lambda x: x["id"])
 
-    if room == "lobby" and len(data) > 0:
-        time = data[0]["created"].replace(tzinfo=ZoneInfo("UTC"))
-        now = datetime.now(ZoneInfo("UTC"))
-        print(now.isoformat()[:-6] + "Z")
-        difference = now - time
-        if difference.total_seconds() > 86400:  # 24 hours in seconds
-            clear_room("lobby")
-            f.current_app.logger.info("Cleared lobby.")
-            return []
-
     for i in data[latest:]:
         i["created"] = i["created"].isoformat() + "Z"  # Z is for the js
 

@@ -196,7 +196,6 @@ class TestChatIntegration(unittest.TestCase):
 
     def test_11_list_rooms(self):
         resp = self._post("/api/v1/rooms/list", {"token": self.__class__.token1})
-        self.assertIn("lobby", resp, "Rooms list missing lobby")
         self.assertIn("test", resp, "Rooms list missing test room")
 
     def test_12_send_message(self):

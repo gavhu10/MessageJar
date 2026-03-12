@@ -142,7 +142,6 @@ def register_user(username, password):
             raise RegistrationError(f"User {username} is already registered.")
         else:
             f.current_app.logger.info(f"Registered new user {username}")
-            cb.add_to_room("lobby", username)
             # Success
 
 

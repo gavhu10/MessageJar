@@ -1,7 +1,7 @@
-import click
 import sqlite3
 from datetime import datetime
 
+import click
 import flask as f
 
 
@@ -70,7 +70,7 @@ def update_db(version):
     elif num < version:
         click.echo("Updating database... ", nl=False)
         with DBConnection() as conn:
-            if num == 1:  # only version so far
+            if num == 1:
                 conn.execute(
                     "CREATE TABLE invitelinks ("
                     "token TEXT PRIMARY KEY,"
@@ -81,6 +81,14 @@ def update_db(version):
                     "FOREIGN KEY (username) REFERENCES user (username) ON DELETE CASCADE"
                     ");"
                 )
+                num = 2
+            if num == 2:
+                conn.execute(
+                    'DELETE FROM messages WHERE room = "lobby";'
+                )  # Version 2 still had traces
+                conn.execute(
+                    'DELETE FROM rooms WHERE roomname = "lobby";'
+                )  # of the original mono-room
             conn.execute(
                 "INSERT OR REPLACE INTO schema_version (num, enforcer) VALUES (?, 0);",
                 (version,),
@@ -89,5 +97,5 @@ def update_db(version):
         click.echo("Done!")
     else:
         click.echo(
-            f"Error updating! Expected version number to be <= {version} " f"Got: {num}"
+            f"Error updating! Expected version number to be <= {version} Got: {num}"
         )
