@@ -152,6 +152,7 @@ def check_user(user, password):
         r = db.execute("SELECT * FROM user WHERE username = ?", (user,)).fetchone()
 
     if r is None or not check_password_hash(r["password"], password):
+        f.current_app.logger.warning(f"Failed attempt to log in as {user}")
         raise AuthError("Incorrect username or password!")
     if user == STATUS_USER:
         f.current_app.logger.warning(f"Attempt to log in as status user {STATUS_USER}")
@@ -175,6 +176,7 @@ def change_password(username, old_password, new_password):
 
 
 def check_valid_token(token):
+    """Check that a token is valid. Raises AuthError on failure."""
     with DBConnection() as db:
         r = db.execute(
             "SELECT username FROM apitokens WHERE token = ?", (token,)

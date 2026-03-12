@@ -37,6 +37,9 @@ def create_app(test_config=None):
         SECRET_KEY="dev",
         # store the database in the instance folder
         DATABASE=os.path.join(app.instance_path, "db.sqlite"),
+        SESSION_COOKIE_SECURE=True,
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE="Lax",
     )
 
     if test_config is None:
