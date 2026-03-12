@@ -6,6 +6,10 @@ A messaging web application built with Python and Flask
 
 ![Message Jar logo](https://raw.githubusercontent.com/gavhu10/MessageJar/refs/heads/main/static/jar.svg)
 
+## Usage and features
+
+Message Jar has many features, some of which might possibly be useful. You can create and manage rooms, access <u>everything</u> from the API and use invite links. If you want to see your jars, click on the logo. That will bring you to a page where you can click on your jar’s names to enter them or create more jars. You can edit your user settings by clicking your username at the top of the page. There you can create invite links, API tokens, and change your password. When you want to log out, just click the button.
+
 ## Installation
 
 You can access an online instance [here](https://messagejar.pythonanywhere.com)!
@@ -24,7 +28,12 @@ If your database no longer has the right schema, run `flask update`. It will not
 
 Slash commands are how you manage your rooms (or jars). To use them, send them like a normal message.
 
-Send the `/help` command to print this message. Use `/add my_friend` to add user "my_friend". The `/remove` command is remarkable similar, although it accomplishes the inverse operation. To use it, send the message `/remove not_my_friend` to remove the user "not_my_friend". You can leave a room by sending the `/leave` command, although if you created the room, you will have to delete the room instead. This is done by sending the `/delete` command. (you will have to reload to see the effects.) But be careful: there is no recovering lost rooms.
+Send the `/help` command to print this message.
+Use `/add my_friend` to add user "my_friend". The `/remove` command is remarkable similar, although it accomplishes the inverse operation.
+To use it, send the message `/remove not_my_friend` to remove the user "not_my_friend".
+You can leave a room by sending the `/leave` command, although if you created the room, you will have to delete the room instead.
+This is done by sending the `/delete` command. But be careful: there is no recovering lost rooms.
+To empty a room, send the `/clear` command. Just like the `/delete` command, only admins can perform this action and you will have to reload to see the effects.
 
 
 ## Invite links
@@ -172,7 +181,8 @@ This endpoint, which is at `/api/v1/send` is simple: it adds a specified message
 
 ### Get messages
 
-This api endpoint is for getting messages and it is at `/api/v1/get`.
+This api endpoint is for getting messages and it is at `/api/v1/get`. The latest parameter is optional. It specifies the id of the last message that the client got.
+It is intended to reduce network traffic.
 
 
 ```json
