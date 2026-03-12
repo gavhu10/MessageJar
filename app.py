@@ -25,8 +25,6 @@ def init_db_command():
     db.init_db()
     click.echo("Initialized the database.")
     auth.init_auth()
-    click.echo("Initialized the authentication system.")
-
 
 def create_app(test_config=None):
     """Create and configure an instance of the Flask application."""

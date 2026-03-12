@@ -22,7 +22,7 @@ class RegistrationError(Exception):
 
 
 def init_auth():
-    f.current_app.logger.info("Initializing authentication system.")
+    f.current_app.logger.info("Creating secret key.")
     with f.current_app.open_instance_resource("config.py", "w") as file:
         file.write(f'SECRET_KEY = "{secrets.token_hex()}"')
 
