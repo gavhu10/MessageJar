@@ -8,7 +8,7 @@ A messaging web application built with Python and Flask
 
 ## Usage and features
 
-Message Jar has many features, some of which might possibly be useful. You can create and manage rooms, access <u>everything</u> from the API and use invite links. If you want to see your jars, click on the logo. That will bring you to a page where you can click on your jar’s names to enter them or create more jars. You can edit your user settings by clicking your username at the top of the page. There you can create invite links, API tokens, and change your password. When you want to log out, just click the button.
+Message Jar has many features, some of which might hopfully be useful to you. You can create and manage rooms, access <u>everything</u> from the API and use invite links. If you want to see your jars, click on the logo. That will bring you to a page where you can click on your jar’s names to enter them or create more jars. You can edit your user settings by clicking your username at the top of the page. There you can create invite links, API tokens, and change your password. When you want to log out, just click the button.
 
 ## Installation
 
