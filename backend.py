@@ -94,7 +94,7 @@ def add_message(author, message, room, force=False):
                     notify(
                         (
                             f"Admin {author} cannot leave the room."
-                            'Use "/delete yes" to delete the room.'
+                            'Use "/delete" to delete the room.'
                         ),
                         room,
                     )

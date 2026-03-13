@@ -3,6 +3,7 @@ import os
 
 import click
 import flask as f
+from flask_wtf.csrf import CSRFProtect
 
 import api
 import auth
@@ -108,6 +109,8 @@ def create_app(test_config=None):
     app.register_blueprint(user.user)
 
     limiter.init_app(app)
+    csrf = CSRFProtect(app)
+    csrf.exempt(api.api)
 
     return app
 
