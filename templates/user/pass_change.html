@@ -5,7 +5,8 @@
 {% endblock %}
 
 {% block content %}
-<form method="post">
+<form method="POST">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <label for="old_password">Old Password</label>
   <input name="old_password" id="old_password" type="password" required>
   <br><label for="new_password">New Password</label>

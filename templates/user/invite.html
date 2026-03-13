@@ -20,6 +20,7 @@ Here are your invites:
         </div>
 
         <form action="{{ url_for('user.rmlink') }}" method="POST" style="margin: 0;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" name="link" value="{{ i['token'] }}">
             <!--material-symbols-light:delete-outline-sharp from https://icon-sets.iconify.design/-->
             <button type="submit" class="icon-button">

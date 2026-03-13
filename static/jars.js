@@ -100,7 +100,10 @@
         fetch('/jar/endpoint/' + encodeURIComponent(window.room_name || ''), {
             method: 'POST',
             credentials: 'include',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': window.csrf_token
+            },
             body: formData.toString()
         }).then(function (res) {
             if (!res.ok) throw new Error('Network response was not ok');

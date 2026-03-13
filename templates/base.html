@@ -29,6 +29,7 @@
     {% if g.user %}
     <li><a href="{{ url_for('user.index') }}">{{ g.user['username'] }}</a>
       <form action="{{ url_for('auth.logout') }}" method="POST" style="display: inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit" class="link-button">
           Log Out
         </button>
