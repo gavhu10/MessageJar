@@ -38,7 +38,8 @@ Here are your invites:
 
 <br>
 Create an invitation here:
-<form action="{{ url_for('user.invite_page') }}" method="post">
+<form action="{{ url_for('user.invite_page') }}" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <select name="room" required>
         <option value="" disabled selected>Select a Room</option>
         {% for i in room_list %}
