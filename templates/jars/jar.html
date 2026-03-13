@@ -18,7 +18,8 @@
 <button type="button" id="sendMessageButton" class="btn btn-primary">Send</button>
 
 <script>
-  window.room_name = {{ room_name | tojson | safe }}
+  window.room_name = {{ room_name | tojson }}
+  window.csrf_token = "{{ csrf_token() }}"
 </script>
 
 <script src="{{ url_for('static', filename='jars.js') }}"></script>

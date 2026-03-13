@@ -3,7 +3,7 @@
   --primary-hover: #b06802;
   --bg-app: #f0f2f5;
   --bg-white: #fff;
-  --secondary-hover: #f5f5f5;
+  --secondary-hover: #d6d6d6;
   --message-border: #d6d6d6;
   --chat-background: #fafafa;
   --timestamp: #333;
@@ -14,23 +14,55 @@
   --border-color: #000;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --secondary-hover: #2d3139;
-    --message-border: #d6d6d6;
-    --chat-background: #010409;
-    --timestamp: #cfcfcf;
-    --primary: #d47d02;
-    --primary-hover: #b06802;
-    --bg-app: #010409;
-    --bg-white: #0d1117;
-    --text-main: #c3cbdf;
-    --text-muted: #485F65;
-    --border-color: #30363D;
-    --flash-background: #001f31;
-    --flash-border: #0274b6;
-  }
+
+.dark-theme {
+  --secondary-hover: #2d3139;
+  --message-border: #d6d6d6;
+  --chat-background: #010409;
+  --timestamp: #cfcfcf;
+  --primary: #d47d02;
+  --primary-hover: #b06802;
+  --bg-app: #010409;
+  --bg-white: #0d1117;
+  --text-main: #c3cbdf;
+  --text-muted: #485F65;
+  --border-color: #30363D;
+  --flash-background: #001f31;
+  --flash-border: #0274b6;
 }
+
+/* material-symbols-light:light-mode-sharp from https://icon-sets.iconify.design/ */
+.dark-theme #theme-button {
+  --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M9.165 14.836Q8 13.67 8 12t1.165-2.835T12 8t2.836 1.165T16 12t-1.164 2.836T12 16t-2.835-1.164M5 12.5H1.5v-1H5zm17.5 0H19v-1h3.5zM11.5 5V1.5h1V5zm0 17.5V19h1v3.5zM6.746 7.404l-2.16-2.098l.695-.745l2.111 2.135zM18.72 19.439l-2.117-2.141l.652-.702l2.16 2.098zM16.596 6.745l2.098-2.16l.745.695l-2.135 2.111zM4.562 18.72l2.14-2.117l.664.652l-2.08 2.179z'/%3E%3C/svg%3E");
+}
+
+/* ic:sharp-dark-mode from https://icon-sets.iconify.design/  */
+#theme-button {
+  --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.39 5.39 0 0 1-4.4 2.26a5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1'/%3E%3C/svg%3E");
+}
+
+span#theme-button {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background-color: currentColor;
+  -webkit-mask-image: var(--svg);
+  mask-image: var(--svg);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.link-button:hover span#theme-button {
+  background-color: var(--primary-hover);
+}
+
+
 
 .jar-icon {
   color: var(--text-main);
@@ -117,6 +149,7 @@ nav ul {
   margin: 0;
   padding: 0;
   gap: 1rem;
+  align-items: center
 }
 
 nav ul li button.link-button,
