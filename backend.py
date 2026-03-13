@@ -34,6 +34,7 @@ def create_room(room_name, creator):
         f'Room {room_name} created by {creator}. Send "/help" to see available commands',
         room_name,
     )
+    f.current_app.logger.info(f"Room {room_name} created.")
 
 
 def notify(content, room):
