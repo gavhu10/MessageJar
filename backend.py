@@ -157,11 +157,11 @@ def add_message(author, message, room, force=False):
                         ' This is done by sending the "/delete" command. '
                         "But be careful:"
                         ' there is no recovering lost rooms. To empty a room, send the "/clear" command.'
-                        ' Just like the "/delete" command, only admins can perform this action '
-                        'A reload may be necessary for the "/leave", "/delete", "/clear", and "/remove" commands'
+                        ' Just like the "/delete" command, only admins can perform this action.'
+                        ' A reload may be necessary for the "/leave", "/delete", "/clear", and "/remove" commands'
                         " due to how the html client works."
-                        "To make someone an admin or remove someones admin status, you will have to be an admin."
-                        'Then you can use the "/add-admin" and "/remove-admin" commands.'
+                        " To make someone an admin or remove someones admin status, you will have to be an admin."
+                        ' Then you can use the "/add-admin" and "/remove-admin" commands.'
                     ),
                     room,
                 )
