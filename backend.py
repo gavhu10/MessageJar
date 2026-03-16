@@ -167,7 +167,13 @@ def add_message(author, message, room, force=False):
                 )
 
             case "remove":  # remove a user
-                if author == args:
+                if args == STATUS_USER:
+                    notify(
+                        "You cannot remove the status user.",
+                        room,
+                    )
+
+                elif author == args:
                     notify(
                         'You cannot remove yourself! Use "/leave" to leave the room.',
                         room,
