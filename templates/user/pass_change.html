@@ -10,10 +10,46 @@
   <label for="old_password">Old Password</label>
   <input name="old_password" id="old_password" type="password" required>
   <br><label for="new_password">New Password</label>
-  <input name="new_password" id="new_password" type="password" required>
-  Retype password:
-  <input name="new_password_rep" id="new_password_rep" type="password" required>
+  <input type="password" name="new_password" id="new_password" required minlength="8"
+    pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+    title="Must contain at least one number, one uppercase, one lowercase letter, and at least 8 characters">
+  <div style="margin-top: 5px;">
+    <input type="checkbox" id="togglePassword">
+    <label style="display:inline;" for="togglePassword">Show Password</label>
+  </div>
+  <label>Retype password:</label>
+  <input type="password" name="new_password_rep" id="new_password_rep" required minlength="8"
+    pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+    title="Must contain at least one number, one uppercase, one lowercase letter, and at least 8 characters">
   <br><br>
   <input type="submit" value="Change Password">
 </form>
+<script>
+  const password = document.getElementById("new_password");
+  const confirmPassword = document.getElementById("new_password_rep");
+
+  function validatePassword() {
+    if (password.value != confirmPassword.value) {
+      confirmPassword.setCustomValidity("Passwords Don't Match");
+    } else {
+      confirmPassword.setCustomValidity('');
+    }
+  }
+
+  password.onchange = validatePassword;
+  confirmPassword.onkeyup = validatePassword;
+
+  const toggleBtn = document.getElementById('togglePassword');
+  const passwordInput = document.getElementById('new_password');
+  const confirmInput = document.getElementById('new_password_rep');
+
+  toggleBtn.addEventListener('change', function () {
+    // Check if the checkbox is checked
+    const type = this.checked ? 'text' : 'password';
+
+    // Update both inputs
+    passwordInput.setAttribute('type', type);
+    confirmInput.setAttribute('type', type);
+  });
+</script>
 {% endblock %}

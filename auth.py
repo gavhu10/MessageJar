@@ -7,7 +7,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import backend as cb
 from backend import AuthError, NotAllowedError
 from db import DBConnection
-
+import re
 STATUS_USER = "Message Jar"
 
 bp = f.Blueprint("auth", __name__, url_prefix="/auth")
@@ -87,8 +87,9 @@ def register():
             error = "Password is required."
         elif password != password_rep:
             error = "Passwords must match."
-
-        if error is None:
+        elif not re.match(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$", password):
+            error = "Password must be 8+ characters with a number and an uppercase letter."
+        else:
             try:
                 register_user(username, password)
             except RegistrationError as e:
