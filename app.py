@@ -89,7 +89,7 @@ def create_app(test_config=None):
         return f.render_template("main.html")
 
     handler = MessageHandler()
-    fmt = "%(asctime)s %(levelname)s %(name)s [%(remote_addr)s %(method)s %(path)s]: %(message)s"
+    fmt = "%(levelname)s %(name)s [%(remote_addr)s %(method)s %(path)s]: %(message)s"
     handler.setFormatter(RequestFormatter(fmt))
     handler.setLevel(logging.DEBUG)
 
