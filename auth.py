@@ -22,23 +22,35 @@ class RegistrationError(Exception):
 
 
 def init_auth():
-    f.current_app.logger.info("Creating secret key.")
     with f.current_app.open_instance_resource("config.py", "w") as file:
         file.write(f'SECRET_KEY = "{secrets.token_hex()}"')
 
 
-def login_required(view):
-    """View decorator that redirects anonymous users to the login page."""
+import functools
 
-    @functools.wraps(view)
-    def wrapped_view(**kwargs):
-        if f.g.user is None:
-            f.flash("Please log in to continue.")
-            return f.redirect(f.url_for("auth.login"))
 
-        return view(**kwargs)
+def login_required(message="Please log in to continue."):
+    """
+    View decorator that redirects anonymous users to the login page.
+    Supports an optional custom flash message.
+    """
 
-    return wrapped_view
+    def decorator(view):
+        @functools.wraps(view)
+        def wrapped_view(**kwargs):
+            if f.g.user is None:
+                f.flash(message)
+                return f.redirect(f.url_for("auth.login"))
+            return view(**kwargs)
+
+        return wrapped_view
+
+    if callable(message):
+        func = message
+        message = "Please log in to continue."
+        return decorator(func)
+
+    return decorator
 
 
 @bp.before_app_request

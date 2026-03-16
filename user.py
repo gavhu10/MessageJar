@@ -237,7 +237,7 @@ def invite_page():
     return f.redirect(f.url_for("user.invite_page"))
 
 
-@auth.login_required
+@auth.login_required("You must be logged in to accept an invite.")
 def invite():
     token = f.request.args.get("token")
 
