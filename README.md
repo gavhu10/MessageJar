@@ -33,7 +33,10 @@ Use `/add my_friend` to add user "my_friend". The `/remove` command is remarkabl
 To use it, send the message `/remove not_my_friend` to remove the user "not_my_friend".
 You can leave a room by sending the `/leave` command, although if you created the room, you will have to delete the room instead.
 This is done by sending the `/delete` command. But be careful: there is no recovering lost rooms.
-To empty a room, send the `/clear` command. Just like the `/delete` command, only admins can perform this action and you will have to reload to see the effects.
+To empty a room, send the `/clear` command. Just like the `/delete` command, only admins can perform this action.
+A reload may be necessary for the `/leave`, `/delete`, `/clear`, and `/remove` commands, due to how the html client works.
+To make someone an admin or remove someones admin status, you will have to be an admin.
+Then you can use the `/add-admin` and `/remove-admin` commands.
 
 
 ## Invite links
