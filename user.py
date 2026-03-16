@@ -244,6 +244,9 @@ def invite():
     try:
         room, link_owner = invite_details(token)
 
+        if not cb.list_users(room):
+            raise InviteError("Room does not exist. It may have been deleted.")
+
         if room not in cb.get_rooms(f.g.user["username"]):
             cb.add_to_room(room, f.g.user["username"])
             cb.notify(
