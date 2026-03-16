@@ -43,7 +43,6 @@ class RequestFormatter(logging.Formatter):
         return super().format(record)
 
 
-
 @click.command("update")
 def update_db_command():
     db.update_db(SCHEMA_VERSION)
