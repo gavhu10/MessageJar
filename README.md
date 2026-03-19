@@ -24,6 +24,10 @@ Otherwise, use one of the options detailed by the flask documentation [here](htt
 
 If your database no longer has the right schema, run `flask update`. It will not modify anything if you are up to date.
 
+> [!NOTE]
+> You must also create a room named "logs".
+> The first user to do so will have access to all of the logged messages.
+
 ## Slash commands
 
 Slash commands are how you manage your rooms (or jars). To use them, send them like a normal message.
