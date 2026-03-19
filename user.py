@@ -1,3 +1,4 @@
+import re
 import secrets
 
 import flask as f
@@ -41,6 +42,8 @@ def pass_change():
             error = "New password is required."
         elif new_password != new_password_rep:
             error = "Passwords must match."
+        elif not re.match(r"^(?=.*[a-z])(?=.*\d)[A-Za-z\d]{8,}$", new_password):
+            error = "Password must contain at least one number and one lowercase letter, and be at least 8 characters"
 
         if error is None:
             try:

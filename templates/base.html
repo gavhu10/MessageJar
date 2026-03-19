@@ -30,7 +30,7 @@
       <li><button class="link-button" id="theme-toggle"><span id="theme-button"></span></button>
         {% if g.user %}
       <li><a href="{{ url_for('user.index') }}">{{ g.user['username'] }}</a>
-      <li><a href="{{ url_for('jar.index') }}">Your rooms</a>
+      <li><a href="{{ url_for('jar.index') }}">Your jars</a>
         <form action="{{ url_for('auth.logout') }}" method="POST" style="display: inline;">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <button type="submit" class="link-button">
