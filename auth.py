@@ -89,7 +89,7 @@ def register():
         elif password != password_rep:
             error = "Passwords must match."
         elif not re.match(r"^(?=.*[a-z])(?=.*\d).{8,}$", password):
-            error = "Password ust contain at least one number and one lowercase letter and be at least 8 characters"
+            error = "Password must contain at least one number and one lowercase letter and be at least 8 characters"
         else:
             try:
                 register_user(username, password)
