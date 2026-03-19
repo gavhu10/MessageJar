@@ -20,7 +20,11 @@ First, install the dependencies with `pip install -r requirements.txt`, preferab
 flask run --debug
 ```
 
-Otherwise, use one of the options detailed by the flask documentation [here](https://flask.palletsprojects.com/en/stable/deploying/).
+Otherwise, use one of the options detailed by the flask documentation [here](https://flask.palletsprojects.com/en/stable/deploying/) or run 
+
+```
+docker compose up
+```
 
 If your database no longer has the right schema, run `flask update`. It will not modify anything if you are up to date.
 
