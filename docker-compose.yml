@@ -1,0 +1,14 @@
+
+services:
+  messagejar:
+    build: .
+    container_name: messagejar
+    ports:
+      - "80:8000"
+    volumes:
+      # Persist database between container restarts
+      - ./instance:/app/instance
+    environment:
+      FLASK_APP: app.py
+      FLASK_ENV: production
+    restart: unless-stopped
