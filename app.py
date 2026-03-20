@@ -27,7 +27,7 @@ class MessageHandler(logging.Handler):
             msg = self.format(record)
             backend.notify(msg, "logs")
         except Exception:
-            self.handleError(record)
+            pass
 
 
 class RequestFormatter(logging.Formatter):
@@ -49,10 +49,11 @@ def update_db_command():
 
 
 @click.command("init")
-def init_db_command():
+@click.option("-r", "--reset", is_flag=True)
+def init_db_command(reset):
     """Clear existing data and create new tables."""
-    db.init_db()
-    click.echo("Initialized the database.")
+
+    db.init_db(reset)
     auth.init_auth()
 
 

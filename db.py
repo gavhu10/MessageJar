@@ -1,5 +1,6 @@
 import sqlite3
 from datetime import datetime
+from os.path import isfile
 
 import click
 import flask as f
@@ -41,12 +42,20 @@ def __close_db(e=None):
         db.close()
 
 
-def init_db():
+def init_db(reset):
     """Clear existing data and create new tables."""
 
-    with DBConnection() as db:
-        with f.current_app.open_resource("schema.sql") as file:
-            db.executescript(file.read().decode("utf8"))
+    if reset or not isfile(f.current_app.config["DATABASE"]):
+        click.echo("Creating database... ", nl=False)
+        with DBConnection() as conn:
+            with f.current_app.open_resource("schema.sql") as file:
+                conn.executescript(file.read().decode("utf8"))
+        click.echo("Done.")
+    else:
+        click.echo(
+            "Database exists; skipping initialization. "
+            "Use -r or --reset to wipe database."
+        )
 
 
 sqlite3.register_converter(

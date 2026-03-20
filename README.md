@@ -14,17 +14,27 @@ Message Jar has many features, some of which might hopfully be useful to you. Yo
 
 You can access an online instance [here](https://messagejar.pythonanywhere.com)!
 
-First, install the dependencies with `pip install -r requirements.txt`, preferably in a virtual environment. Then, run `flask init` to create the database and secret key. Now you can start Message Jar! If you are developing or debugging, start flask with
+If you want to use docker to serve Message Jar with gunicorn, run
 
+```bash
+docker compose up
 ```
+
+Otherwise, you can do it manually.
+First, install the dependencies with 
+
+```bash
+pip3 install -r requirements.txt
+```
+
+preferably in a virtual environment.
+Then, run `flask init` to create the database and secret key. Now you can start Message Jar! If you are developing or debugging, start flask with
+
+```bash
 flask run --debug
 ```
 
-Otherwise, use one of the options detailed by the flask documentation [here](https://flask.palletsprojects.com/en/stable/deploying/) or run 
-
-```
-docker compose up
-```
+Otherwise, use one of the options detailed by the flask documentation [here](https://flask.palletsprojects.com/en/stable/deploying/).
 
 If your database no longer has the right schema, run `flask update`. It will not modify anything if you are up to date.
 
