@@ -20,8 +20,8 @@ If you want to use docker to serve Message Jar with gunicorn, run
 docker compose up
 ```
 
-Otherwise, you can do it manually.
-First, install the dependencies with 
+You can also do it manually if you want.
+To do that, first install the dependencies with 
 
 ```bash
 pip3 install -r requirements.txt
