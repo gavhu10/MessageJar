@@ -151,12 +151,14 @@ def manage_rooms(username, action):
 def manage_user(action):
     try:
         args = get_kv(
-            f.request, ["username", "password", "name", "newpass"], ["name", "newpass"]
+            f.request, ["username", "password", "name", "newpass"], ["name", "newpass", "password"]
         )
     except ValueError:
         return missing_arg()
 
     if action not in ["new", "exists"]:
+        if args["password"]:
+            return missing_arg("password")
         try:
             auth.check_user(args["username"], args["password"])
         except AuthError as e:
