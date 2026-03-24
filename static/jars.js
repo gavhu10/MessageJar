@@ -1,5 +1,24 @@
 (function () {
     window.lastSeenId = 0;
+    let notificationInterval = null;
+    const originalTitle = document.title;
+
+    function flashTabTitle() {
+        if (document.hasFocus() || notificationInterval) return;
+
+        notificationInterval = setInterval(() => {
+            document.title = document.title === originalTitle
+                ? "New Message!"
+                : originalTitle;
+        }, 1000);
+
+        // Stop flashing when user clicks back into the tab
+        window.addEventListener('focus', () => {
+            clearInterval(notificationInterval);
+            notificationInterval = null;
+            document.title = originalTitle;
+        }, { once: true });
+    }
 
     function renderMessages(messages) {
         const container = document.getElementById('container');
@@ -20,6 +39,11 @@
             const ts = document.createElement('span');
             ts.className = 'ts';
             ts.textContent = m.created ? m.created : 'No timestamp';
+
+            if (window.lastSeenId !== 0) {
+                p.classList.add('new-arrival');
+            }
+
             p.appendChild(ts);
 
             container.appendChild(p);
@@ -45,12 +69,6 @@
 
     function updateLastSeenFrom(allMessages) {
         if (!Array.isArray(allMessages) || allMessages.length === 0) return;
-        // backend returns messages with id reassigned to 0..N-1, so use the max id
-        // const maxId = allMessages.reduce(function (acc, cur) {
-        //     if (typeof cur.id === 'number' && cur.id > acc) return cur.id;
-        //     return acc;
-        // }, window.lastSeenId);
-        // window.lastSeenId = Math.max(window.lastSeenId, maxId);
         window.lastSeenId += allMessages.length;
     }
 
@@ -69,6 +87,7 @@
             if (!all.length) return;
 
             notifyPing();
+            flashTabTitle();
 
             const messages = localizeTimestamps(all)
 
