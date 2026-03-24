@@ -3,7 +3,7 @@ import os
 
 import click
 import flask as f
-from flask_wtf.csrf import CSRFProtect
+from flask_wtf.csrf import CSRFProtect, CSRFError
 
 import api
 import auth
@@ -111,6 +111,12 @@ def create_app(test_config=None):
     limiter.init_app(app)
     csrf = CSRFProtect(app)
     csrf.exempt(api.api)
+
+    @app.errorhandler(CSRFError)
+    def handle_csrf_error(e):
+        app.logger.warning("CSRF error.")
+        f.flash("CSRF error. Please reload and try again.")
+        return f.redirect(f.request.url)
 
     return app
 
