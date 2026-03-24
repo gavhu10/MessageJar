@@ -44,6 +44,10 @@
                 p.classList.add('new-arrival');
             }
 
+            if (author == window.username) {
+                p.classList.add("sent-by-me")
+            }
+
             p.appendChild(ts);
 
             container.appendChild(p);
