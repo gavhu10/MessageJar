@@ -39,7 +39,7 @@ class TestChatIntegration(unittest.TestCase):
         env["FLASK_RUN_PORT"] = str(PORT)
 
         print("Initializing database...")
-        subprocess.run([PYTHON_EXE, "-m", "flask", "init"], env=env, check=True)
+        subprocess.run([PYTHON_EXE, "-m", "flask", "init", "--reset"], env=env, check=True)
 
         with open("instance/config.py", "w") as f:
             f.write("RATELIMIT_ENABLED = False")
