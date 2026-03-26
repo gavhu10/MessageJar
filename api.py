@@ -157,7 +157,7 @@ def manage_user(action):
         return missing_arg()
 
     if action not in ["new", "exists"]:
-        if args["password"]:
+        if not args["password"]:
             return missing_arg("password")
         try:
             auth.check_user(args["username"], args["password"])
