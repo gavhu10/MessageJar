@@ -3,6 +3,22 @@
     let notificationInterval = null;
     const originalTitle = document.title;
 
+    function triggerDesktopNotification(author, content) {
+        if (!("Notification" in window)) return;
+
+        if (Notification.permission === "granted") {
+            // Only show if the user isn't looking at the tab
+            if (document.hidden) {
+                new Notification(`New message from ${author}`, {
+                    body: content,
+                    tag: 'chat-alert' // Prevents flooding by replacing the old notification
+                });
+            }
+        } else if (Notification.permission !== "denied") {
+            Notification.requestPermission();
+        }
+    }
+
     function flashTabTitle() {
         if (document.hasFocus() || notificationInterval) return;
 
@@ -94,6 +110,14 @@
             flashTabTitle();
 
             const messages = localizeTimestamps(all)
+
+            if (window.lastSeenId !== 0) {
+                messages.forEach(m => {
+                    if (m.id > window.lastSeenId && m.author !== window.username) {
+                        triggerDesktopNotification(m.author, m.content);
+                    }
+                });
+            }
 
             // On first load, render everything
             if (window.lastSeenId === 0) {
