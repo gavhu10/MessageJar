@@ -124,8 +124,12 @@ def login():
     return f.render_template("auth/login.html")
 
 
-@bp.route("/logout", methods=("POST",))
+@bp.route("/logout", methods=("GET", "POST"))
 def logout():
+
+    if f.request.method == "GET":
+        return f.redirect(f.url_for("auth.logout"))
+    
     """Clear the current session, including the stored user id."""
     f.session.clear()
     return f.redirect(f.url_for("auth.login"))
