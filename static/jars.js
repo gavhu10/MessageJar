@@ -2,6 +2,20 @@
     window.lastSeenId = 0;
     let notificationInterval = null;
     const originalTitle = document.title;
+    let flashed = false
+
+    function flashError(message) {
+        let content = document.getElementsByClassName("content")[0]
+        if (flashed) {
+            content.getElementsByClassName("flash")[0].textContent = message
+        } else {
+            f = document.createElement("div")
+            f.className = "flash"
+            f.textContent = message
+            content.prepend(f)
+            flashed = true
+        }
+    }
 
     function triggerDesktopNotification(author, content) {
         if (!("Notification" in window)) return;
@@ -44,6 +58,10 @@
             const m = messages[i];
             // backend returns id as sequential index starting at 0
             if (typeof m.id === 'number' && m.id <= window.lastSeenId) continue;
+            if (container.lastElementChild && container.lastElementChild.id === String(m.id)) {
+                continue;
+            }
+
 
             const author = m.author || "Error getting author";
             const content = m.content || "Error getting message";
@@ -51,6 +69,7 @@
             const p = document.createElement('p');
             p.className = 'message';
             p.textContent = author + ': ' + content;
+            p.setAttribute("id", m.id);
 
             const ts = document.createElement('span');
             ts.className = 'ts';
@@ -99,8 +118,15 @@
             credentials: 'include',
             headers: { 'Accept': 'application/json' }
         }).then(function (res) {
-            if (!res.ok) throw new Error('Network response was not ok');
-            return res.json();
+            if (!res.ok) {
+                flashError("There was a problem getting new messages. Please reload.")
+                console.log("problem")
+                throw new Error('Network response was not ok');
+            }
+            return res.json().catch(function (err) {
+                flashError("There was a problem getting new messages. Please reload.")
+                throw err
+            });
         }).then(function (data) {
             const all = (data && data.messages) ? data.messages : Array.isArray(data) ? data : [];
 
