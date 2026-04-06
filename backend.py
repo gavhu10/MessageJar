@@ -49,13 +49,13 @@ def add_message(author, message, room, force=False):
     if not (force or room in get_rooms(author)):
         raise AuthError(f"User {author} is not a member of room {room}.")
 
-    with DBConnection() as db:
-        db.execute(
+    with DBConnection() as conn:
+        conn.execute(
             "INSERT INTO messages (author, content, room) VALUES (?, ?, ?)",
             (author, message, room),
         )
 
-        db.commit()
+        conn.commit()
 
     if message.startswith("/"):
         command = message[1:].split(" ")[0]  # remove the leading slash
@@ -314,13 +314,13 @@ def get_messages(room, latest=0):
         FROM messages m
         JOIN user u ON m.author = u.username
         WHERE room = ?
-        ORDER BY m.created ASC
+        ORDER BY m.id ASC
     """
 
     data = []
 
-    with DBConnection() as db:
-        results = db.execute(query, (room,))
+    with DBConnection() as conn:
+        results = conn.execute(query, (room,))
         row_headers = [x[0] for x in results.description]
 
         rv = results.fetchall()

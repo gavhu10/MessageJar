@@ -58,7 +58,7 @@
             const m = messages[i];
             // backend returns id as sequential index starting at 0
             if (typeof m.id === 'number' && m.id <= window.lastSeenId) continue;
-            if (container.lastElementChild && container.lastElementChild.id === String(m.id)) {
+            if (container.lastElementChild && container.lastElementChild.id >= String(m.id)) {
                 continue;
             }
 
