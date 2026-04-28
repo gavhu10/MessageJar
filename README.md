@@ -30,7 +30,7 @@ uv sync
 Then, run `flask init` to create the database and secret key. Now you can start Message Jar! If you are developing or debugging, start flask with
 
 ```bash
-flask run --debug
+uv run flask run --debug
 ```
 
 Otherwise, use one of the options detailed by the flask documentation [here](https://flask.palletsprojects.com/en/stable/deploying/).
