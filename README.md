@@ -17,8 +17,10 @@ You can access an online instance [here](https://messagejar.pythonanywhere.com)!
 If you want to use docker to serve Message Jar with gunicorn, run
 
 ```bash
-docker compose up
+sudo docker compose up
 ```
+
+It must be run as root in order to access port 80.
 
 You can also do it manually if you want.
 To do that, first install the dependencies with 
