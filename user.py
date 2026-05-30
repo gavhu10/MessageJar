@@ -64,7 +64,7 @@ def pass_change():
 def rmtoken():
     if f.request.method == "GET":
         return f.redirect(f.url_for("user.tokens"))
-    
+
     message = None
 
     token = f.request.form.get("token")
@@ -192,7 +192,7 @@ def invite_details(token):
 def rmlink():
     if f.request.method == "GET":
         return f.redirect(f.url_for("user.invite_page"))
-    
+
     message = None
 
     link = f.request.form.get("link")

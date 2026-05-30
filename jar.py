@@ -8,6 +8,7 @@ STATUS_USER = "Message Jar"
 
 jar = f.Blueprint("jar", __name__, url_prefix="/jar")
 
+
 @jar.errorhandler(404)
 def page_not_found(_):
     f.flash("Room does not exist.")

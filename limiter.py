@@ -23,4 +23,3 @@ else:
         get_remote_address,
         storage_uri=f"redis+unix://{redis.socket_file}",
     )
-

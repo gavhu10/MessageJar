@@ -151,7 +151,9 @@ def manage_rooms(username, action):
 def manage_user(action):
     try:
         args = get_kv(
-            f.request, ["username", "password", "name", "newpass"], ["name", "newpass", "password"]
+            f.request,
+            ["username", "password", "name", "newpass"],
+            ["name", "newpass", "password"],
         )
     except ValueError:
         return missing_arg()
