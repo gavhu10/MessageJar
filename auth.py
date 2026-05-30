@@ -71,11 +71,12 @@ def load_logged_in_user():
 
 @bp.route("/register", methods=("GET", "POST"))
 def register():
-    """Register a new user.
+    """Register a new user."""
 
-    Validates that the username is not already taken. Hashes the
-    password for security.
-    """
+    if f.g.user is not None:
+        f.flash("You are already logged in!")
+        return f.redirect(f.url_for("jar.index"))
+
     if f.request.method == "POST":
         username = f.request.form["username"]
         password = f.request.form["password"]
@@ -107,6 +108,11 @@ def register():
 @bp.route("/login", methods=("GET", "POST"))
 def login():
     """Log in a registered user by adding the user id to the session."""
+
+    if f.g.user is not None:
+        f.flash("You are already logged in!")
+        return f.redirect(f.url_for("jar.index"))
+
     if f.request.method == "POST":
         username = f.request.form["username"]
         password = f.request.form["password"]
@@ -129,7 +135,7 @@ def logout():
 
     if f.request.method == "GET":
         return f.redirect(f.url_for("auth.logout"))
-    
+
     """Clear the current session, including the stored user id."""
     f.session.clear()
     return f.redirect(f.url_for("auth.login"))
